@@ -15,8 +15,8 @@
     </content>
     <orderEntry type="jdk" jdkName="Android 4.0 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Main" exported="" />
-    <orderEntry type="library" exported="" name="droid-libs" level="project" />
+    <orderEntry type="module" module-name="Main" />
+    <orderEntry type="library" name="droid-libs" level="project" />
   </component>
 </module>
 

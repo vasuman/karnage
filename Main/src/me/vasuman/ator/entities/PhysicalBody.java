@@ -37,4 +37,8 @@ public abstract class PhysicalBody extends GameEntity {
     protected void pushBody(Vector2 force) {
         body.applyForceToCenter(force, true);
     }
+
+    public void setDamping(float v) {
+        body.setLinearDamping(v);
+    }
 }

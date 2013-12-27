@@ -3,6 +3,8 @@ package me.vasuman.ator.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector3;
+import me.vasuman.ator.Drawer;
+import me.vasuman.ator.util.Point;
 
 import java.util.ArrayList;
 
@@ -39,14 +41,21 @@ public class TouchInput implements InputProcessor {
         if (pointer >= MAX_TOUCH) {
             return false;
         }
+        Point actual = getVirtual(screenX, screenY);
         for (int i = 0; i < regions.size(); i++) {
             SensorRegion region = regions.get(i);
-            if (region.getPointer() == -1 && region.touch(screenX, screenY, pointer)) {
+            if (region.getPointer() == -1 && region.touch(actual.x, actual.y, pointer)) {
                 deref[pointer] = i;
                 return true;
             }
         }
         return false;
+    }
+
+    private Point getVirtual(int screenX, int screenY) {
+        // TODO: optimize if necessary
+        Vector3 actual = Drawer.unTouch(screenX, screenY);
+        return new Point((int) actual.x, (int) actual.y);
     }
 
     @Override
@@ -58,8 +67,9 @@ public class TouchInput implements InputProcessor {
         if (position == -1) {
             return false;
         }
+        Point actual = getVirtual(screenX, screenY);
         SensorRegion region = regions.get(position);
-        region.up(screenX, screenY);
+        region.up(actual.x, actual.y);
         deref[pointer] = -1;
         return true;
     }
@@ -73,8 +83,9 @@ public class TouchInput implements InputProcessor {
         if (position == -1) {
             return false;
         }
+        Point actual = getVirtual(screenX, screenY);
         SensorRegion region = regions.get(position);
-        region.update(screenX, screenY);
+        region.update(actual.x, actual.y);
         return false;
     }
 

@@ -13,13 +13,17 @@ import me.vasuman.ator.Drawer;
 public class Wall extends PhysicalBody implements Drawable {
     protected Drawer drawer;
 
+    @Override
+    public void destroy() {
+
+    }
+
     // Top-left positioning
     public Wall(final float x, final float y, final float w, final float h) {
         super(x + w / 2, y + h / 2, w, h, true);
         drawer = new Drawer() {
             @Override
             public void draw() {
-                offset(true);
                 debugColor(Color.WHITE);
                 debugBox(x + w / 2, y + h / 2, w, h);
             }

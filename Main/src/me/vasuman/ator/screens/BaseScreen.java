@@ -17,7 +17,7 @@ public abstract class BaseScreen implements Screen {
         BaseScreen.game = game;
     }
 
-    protected int width, height;
+    public int width, height;
     protected boolean paused;
 
     public BaseScreen() {

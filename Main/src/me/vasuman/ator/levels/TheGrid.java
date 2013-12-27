@@ -1,10 +1,12 @@
 package me.vasuman.ator.levels;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.entities.Player;
 import me.vasuman.ator.entities.Wall;
@@ -16,60 +18,45 @@ import me.vasuman.ator.entities.Wall;
  * Time: 7:16 PM
  */
 public class TheGrid extends Level {
+    public static final float CAM_ELEVATION = 100;
+    public static final float GYRO_IMPACT = 7f;
     private Drawer drawer;
     private Player player;
-    private static final int vSpace = 32;
-    private static final int hSpace = 32;
-    public static final int lWidth = 1280;
-    public static final int lHeight = 720;
+    private static final int VERT_SP = 32;
+    private static final int HORIZ_SP = 32;
+    public static final int L_WIDTH = 1280;
+    public static final int L_HEIGHT = 720;
 
     public TheGrid() {
-    }
-
-    @Override
-    public void init() {
-        // Draw the entire scene to a framebuffer
-        FrameBuffer buffer = new FrameBuffer(Pixmap.Format.RGB565, lWidth, lHeight, false);
-        Drawer.clear();
-        buffer.begin();
-        (new Drawer() {
-            @Override
-            public void draw() {
-                offset(false);
-                Color color = new Color(0.0f, 1.0f, 0.0f, 0.5f);
-                debugColor(color);
-                for (int i = 0; i <= Math.floor(lWidth / vSpace); i++) {
-                    float posX = i * vSpace + 1;
-                    debugLine(posX, 2, posX, lHeight - 1);
-                }
-                for (int i = 0; i <= Math.floor(lHeight / hSpace); i++) {
-                    float posY = i * hSpace + 2;
-                    debugLine(1, posY, lWidth - 1, posY);
-                }
-            }
-        }).draw();
-        buffer.end();
-        final Texture texture = buffer.getColorBufferTexture();
-        //buffer.dispose();
-        final int sWidth = Gdx.graphics.getWidth();
-        final int sHeight = Gdx.graphics.getHeight();
+        super();
         drawer = new Drawer() {
             @Override
             public void draw() {
-                offset(false);
-                sprite.begin();
-                sprite.draw(texture, 0, 0, (int) camera.position.x - sWidth / 2, -(int) camera.position.y + sHeight / 2, sWidth, sHeight);
-                sprite.end();
+                debugColor(Color.GREEN);
+                for (int i = 0; i < (L_WIDTH / HORIZ_SP); i++) {
+                    float posX = i * HORIZ_SP;
+                    debugLine(posX, 0, posX, L_HEIGHT);
+                }
+                for (int i = 0; i < (L_HEIGHT / VERT_SP); i++) {
+                    float posY = i * VERT_SP;
+                    debugLine(0, posY, L_WIDTH, posY);
+                }
             }
         };
-        // Init Walls
-        player = new Player(lWidth / 2, lHeight / 2);
-        Wall[] walls = new Wall[4];
-        walls[0] = new Wall(0, 0, 5, lHeight);
-        walls[1] = new Wall(0, 0, lWidth, 5);
-        walls[2] = new Wall(lWidth, 0, 5, lHeight);
-        walls[3] = new Wall(0, lHeight, lWidth, 5);
 
+        Environment environment = Drawer.getEnvironment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
+        environment.add(new DirectionalLight().set(1, 0.6f, 0.3f, 1, 1, 0));
+        environment.add(new DirectionalLight().set(0.7f, 1, 1, -1, -1, 0));
+
+        // Init Walls
+        player = new Player(L_WIDTH / 2, L_HEIGHT / 2);
+        Wall[] walls = new Wall[4];
+        walls[0] = new Wall(0, 0, 5, L_HEIGHT);
+        walls[1] = new Wall(0, 0, L_WIDTH, 5);
+        walls[2] = new Wall(L_WIDTH, 0, 5, L_HEIGHT);
+        walls[3] = new Wall(0, L_HEIGHT, L_WIDTH, 5);
+        shiftCamera();
     }
 
     @Override
@@ -77,8 +64,22 @@ public class TheGrid extends Level {
         return drawer;
     }
 
+    private void shiftCamera() {
+        PerspectiveCamera camera = Drawer.getPerspectiveCamera();
+        Vector2 shift = getVector(VectorType.Movement);
+        shift.scl(GYRO_IMPACT);
+        Vector3 pos = new Vector3(player.getPosition(), 0);
+        camera.position.set(pos);
+        pos.z = 0;
+        //camera.position.add(pos);
+        //camera.position.scl(0.5f);
+        camera.lookAt(pos);
+        camera.up.set(0, 1, 0);
+    }
+
     @Override
     public void update(float delT) {
-        Drawer.setViewport(player.getPosition());
+        shiftCamera();
+        // camera.position.set(player.getPosition(), camera.position.z);
     }
 }

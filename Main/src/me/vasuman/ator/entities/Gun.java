@@ -22,16 +22,18 @@ public class Gun extends Extension {
 
 
     @Override
+    public void destroy() {
+    }
+
+    @Override
     public void update(float delT) {
         if (this.counter < 0) {
             this.counter--;
             return;
         }
         // TODO: Call fire!
-
     }
 
     private void fire(Vector2 direction) {
-
     }
 }

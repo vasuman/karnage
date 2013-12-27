@@ -1,9 +1,9 @@
 package me.vasuman.ator;
 
 import me.vasuman.ator.entities.GameEntity;
+import me.vasuman.ator.levels.Level;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Ator
@@ -15,8 +15,7 @@ public class Manager {
     private final ArrayList<GameEntity> entities = new ArrayList<GameEntity>();
     private int globalIdx = 0;
     private static Manager ourInstance = new Manager();
-
-    public static HashMap map = new HashMap();
+    public static Level level;
 
     public static Manager getInstance() {
         return ourInstance;
@@ -39,10 +38,20 @@ public class Manager {
                 continue;
             }
             e.update(delT);
-            if (Drawable.class.isInstance(e)) {
+        }
+    }
+
+    public void draw() {
+        for (GameEntity e : entities) {
+            if (e instanceof Drawable) {
                 ((Drawable) e).getDrawer().draw();
             }
         }
+    }
+
+    public void init(Level level) {
+        entities.clear();
+        Manager.level = level;
     }
 
     public void clear() {
