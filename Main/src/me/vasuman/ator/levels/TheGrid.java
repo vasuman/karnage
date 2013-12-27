@@ -18,12 +18,13 @@ import me.vasuman.ator.entities.Wall;
  * Time: 7:16 PM
  */
 public class TheGrid extends Level {
-    public static final float CAM_ELEVATION = 100;
-    public static final float GYRO_IMPACT = 7f;
+    public static final float CAM_ELEVATION = 100f;
+    public static final float MOTION_IMPACT = -8f;
+    public static final float LPF_ALPHA = 0.8f;
     private Drawer drawer;
     private Player player;
-    private static final int VERT_SP = 32;
-    private static final int HORIZ_SP = 32;
+    private static final int VERTICAL_SP = 32;
+    private static final int HORIZONTAL_SP = 32;
     public static final int L_WIDTH = 1280;
     public static final int L_HEIGHT = 720;
 
@@ -33,12 +34,12 @@ public class TheGrid extends Level {
             @Override
             public void draw() {
                 debugColor(Color.GREEN);
-                for (int i = 0; i < (L_WIDTH / HORIZ_SP); i++) {
-                    float posX = i * HORIZ_SP;
+                for (int i = 0; i < (L_WIDTH / HORIZONTAL_SP); i++) {
+                    float posX = i * HORIZONTAL_SP;
                     debugLine(posX, 0, posX, L_HEIGHT);
                 }
-                for (int i = 0; i < (L_HEIGHT / VERT_SP); i++) {
-                    float posY = i * VERT_SP;
+                for (int i = 0; i < (L_HEIGHT / VERTICAL_SP); i++) {
+                    float posY = i * VERTICAL_SP;
                     debugLine(0, posY, L_WIDTH, posY);
                 }
             }
@@ -56,7 +57,7 @@ public class TheGrid extends Level {
         walls[1] = new Wall(0, 0, L_WIDTH, 5);
         walls[2] = new Wall(L_WIDTH, 0, 5, L_HEIGHT);
         walls[3] = new Wall(0, L_HEIGHT, L_WIDTH, 5);
-        shiftCamera();
+        updateCamera();
     }
 
     @Override
@@ -64,22 +65,33 @@ public class TheGrid extends Level {
         return drawer;
     }
 
-    private void shiftCamera() {
+    private void updateCamera() {
         PerspectiveCamera camera = Drawer.getPerspectiveCamera();
-        Vector2 shift = getVector(VectorType.Movement);
-        shift.scl(GYRO_IMPACT);
-        Vector3 pos = new Vector3(player.getPosition(), 0);
-        camera.position.set(pos);
-        pos.z = 0;
-        //camera.position.add(pos);
-        //camera.position.scl(0.5f);
-        camera.lookAt(pos);
+        Vector2 playerPosition = player.getPosition();
+        Vector2 moveVector = getVector(VectorType.Movement);
+        moveVector.scl(MOTION_IMPACT);
+        Vector3 newPosition = wrapSphere(playerPosition, moveVector, CAM_ELEVATION);
+        LPFSet(camera.position, newPosition);
+        camera.lookAt(new Vector3(playerPosition, 0));
         camera.up.set(0, 1, 0);
+    }
+
+    private void LPFSet(Vector3 vecA, Vector3 vecB) {
+        vecA.scl(LPF_ALPHA);
+        vecA.add(new Vector3(vecB).scl(1 - LPF_ALPHA));
+    }
+
+
+    private Vector3 wrapSphere(Vector2 center, Vector2 shift, float elevation) {
+        Vector3 basePosition = new Vector3(center, 0);
+        Vector3 boundVector = new Vector3(shift, elevation);
+        boundVector.limit(elevation);
+        basePosition.add(boundVector);
+        return basePosition;
     }
 
     @Override
     public void update(float delT) {
-        shiftCamera();
-        // camera.position.set(player.getPosition(), camera.position.z);
+        updateCamera();
     }
 }

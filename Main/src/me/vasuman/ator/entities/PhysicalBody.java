@@ -41,4 +41,8 @@ public abstract class PhysicalBody extends GameEntity {
     public void setDamping(float v) {
         body.setLinearDamping(v);
     }
+
+    public Vector2 getVelocity() {
+        return body.getPosition().scl(Physics.scale);
+    }
 }

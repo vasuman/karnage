@@ -1,4 +1,4 @@
-package me.vasuman.ator.input;
+package me.vasuman.ator.util;
 
 /**
  * Ator

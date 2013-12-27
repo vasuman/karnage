@@ -4,8 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import me.vasuman.ator.*;
-import me.vasuman.ator.input.RadialControl;
-import me.vasuman.ator.input.TouchInput;
+import me.vasuman.ator.iface.RadialControl;
+import me.vasuman.ator.iface.TouchInput;
 import me.vasuman.ator.screens.BaseScreen;
 import me.vasuman.ator.util.Point;
 

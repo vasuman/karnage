@@ -1,4 +1,4 @@
-package me.vasuman.ator.input;
+package me.vasuman.ator.iface;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;

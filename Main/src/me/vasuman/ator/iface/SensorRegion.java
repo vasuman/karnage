@@ -1,6 +1,7 @@
-package me.vasuman.ator.input;
+package me.vasuman.ator.iface;
 
 import com.badlogic.gdx.math.Vector2;
+import me.vasuman.ator.util.Shape;
 
 /**
  * Ator
