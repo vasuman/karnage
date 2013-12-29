@@ -1,6 +1,13 @@
 package me.vasuman.ator.entities;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import me.vasuman.ator.Drawer;
+import me.vasuman.ator.Manager;
+import me.vasuman.ator.levels.Level;
 
 /**
  * Ator
@@ -8,16 +15,22 @@ import com.badlogic.gdx.math.Vector2;
  * Date: 12/3/13
  * Time: 7:55 PM
  */
+
+// TODO: implement Drawable
 public class Gun extends Extension {
-    private final int cooldown;
+    public static final float bulletSize = 5;
+    private final int timeout;
+    private final float height;
+    protected final Vector2 direction = new Vector2(1, 0);
+    private static final Model bulletModel = Drawer.basicSphere(bulletSize, ColorAttribute.createDiffuse(Color.YELLOW));
+    public static final float bulletSpeed = 0.5f;
     private int counter;
 
-    private static final float SQRT2 = (float) Math.sqrt(2);
-
-    public Gun(float fireRate, float damage) {
-        this.counter = 0;
-        this.cooldown = Math.round(1 / fireRate);
-
+    public Gun(int timeout, float height) {
+        counter = 0;
+        this.timeout = timeout;
+        this.height = height;
+        identifier = EntityType.GUN;
     }
 
 
@@ -27,13 +40,24 @@ public class Gun extends Extension {
 
     @Override
     public void update(float delT) {
-        if (this.counter < 0) {
-            this.counter--;
+        Vector2 rotation = Manager.level.getVector(Level.VectorType.Firing);
+        if (rotation.x == 0 && rotation.y == 0) {
             return;
         }
-        // TODO: Call fire!
+        rotation.nor();
+        direction.set(rotation);
+        if (counter-- > 0) {
+            return;
+        }
+
+        counter = timeout;
+        this.fire();
     }
 
-    private void fire(Vector2 direction) {
+    // Can be overridden
+    protected void fire() {
+        Vector3 position = new Vector3(direction.x * 2 * player.size, direction.y * 2 * player.size, height);
+        position.add(new Vector3(player.getPosition(), 0));
+        new Bullet(position, direction.cpy().scl(bulletSpeed), bulletModel, bulletSize);
     }
 }

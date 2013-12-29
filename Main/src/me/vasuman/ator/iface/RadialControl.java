@@ -1,10 +1,13 @@
 package me.vasuman.ator.iface;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
-import me.vasuman.ator.Drawable;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import me.vasuman.ator.Drawer;
-import me.vasuman.ator.util.Shape;
 
 /**
  * Ator
@@ -12,34 +15,55 @@ import me.vasuman.ator.util.Shape;
  * Date: 12/11/13
  * Time: 4:05 PM
  */
-public class RadialControl extends SensorRegion implements Drawable {
-    private Drawer drawer;
-    private int limit;
+public class RadialControl extends Actor {
+    private float x, y;
+    private float limit;
+    private Texture texture;
 
-    public RadialControl(final int x, final int y, final int size) {
-        super(new Shape.Circle(x, y, size));
-        limit = size;
-        drawer = new Drawer() {
-            private final Color color = new Color(1, 0, 0, 0.1f);
-            @Override
-            public void draw() {
-                debugColor(Color.RED);
-                debugCircle(x, y, size);
+    public RadialControl(final int centerX, final int centerY, final int limit) {
+        setBounds(centerX - limit, centerY - limit, 2 * limit, 2 * limit);
+        x = getWidth() / 2;
+        y = getHeight() / 2;
+        this.limit = limit;
+        texture = Drawer.drawCircleTexture(limit, new Color(0.8f, 0.5f, 0.5f, 0.5f));
+        addListener(new InputListener() {
+            private float magnitude(float x, float y) {
+                return (float) Math.sqrt(x * x + y * y);
             }
-        };
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (magnitude(x - limit, y - limit) > limit) {
+                    return false;
+                }
+                RadialControl.this.x = x;
+                RadialControl.this.y = y;
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                RadialControl.this.x = limit;
+                RadialControl.this.y = limit;
+            }
+
+            @Override
+            public void touchDragged(InputEvent event, float x, float y, int pointer) {
+                RadialControl.this.x = x;
+                RadialControl.this.y = y;
+            }
+        });
+
     }
 
-    @Override
-    public Drawer getDrawer() {
-        return drawer;
-    }
-
-    @Override
-    public boolean click() {
-        return false;
-    }
 
     public Vector2 getDisplacement() {
-        return new Vector2(x - shape.getX(), y - shape.getY()).limit(limit);
+        return new Vector2(x - limit, y - limit);
     }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        batch.draw(texture, getX(), getY());
+    }
+
 }

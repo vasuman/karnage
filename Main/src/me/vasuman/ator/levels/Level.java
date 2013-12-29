@@ -1,15 +1,15 @@
 package me.vasuman.ator.levels;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import me.vasuman.ator.*;
+import me.vasuman.ator.Drawable;
+import me.vasuman.ator.Drawer;
+import me.vasuman.ator.Manager;
+import me.vasuman.ator.Physics;
+import me.vasuman.ator.iface.InputController;
 import me.vasuman.ator.iface.RadialControl;
-import me.vasuman.ator.iface.TouchInput;
 import me.vasuman.ator.screens.BaseScreen;
 import me.vasuman.ator.util.Point;
-
-import java.util.ArrayList;
 
 /**
  * Ator
@@ -18,37 +18,28 @@ import java.util.ArrayList;
  * Time: 8:52 PM
  */
 public abstract class Level extends BaseScreen implements Drawable {
-    public static final Point STICK_POS = new Point(540, 270);
-    public static final int STICK_SIZE = 70;
+    public static final Point STICK_POS = new Point(1100, 120);
+    public static final int STICK_SIZE = 110;
     private Manager manager;
-    private TouchInput input;
+    private InputController input;
     private Physics physics;
-    private ArrayList<Drawable> OSD;
     private RadialControl control;
 
     public static enum VectorType {
-        Movement, Firing;
+        Movement, Firing
     }
 
 
     public Level() {
         super();
-
-        OSD = new ArrayList<Drawable>();
-
         // "init" all the things!
-        Drawer.init(MainGame.resX, MainGame.resY);
-        Drawer.getPerspectiveCamera().translate(0, 0, height);
-
         manager = Manager.getInstance();
         manager.init(this);
 
-        input = new TouchInput();
-        Gdx.input.setInputProcessor(input);
+        input = new InputController();
 
         control = new RadialControl(STICK_POS.x, STICK_POS.y, STICK_SIZE);
-        OSD.add(control);
-        input.addRegion(control);
+        stage.addActor(control);
 
         physics = Physics.getInstance();
         physics.init();
@@ -59,19 +50,15 @@ public abstract class Level extends BaseScreen implements Drawable {
         // TODO: fix delta
         physics.update(delta);
         manager.update(delta);
-        this.update(delta);
-
+        update(delta);
         Drawer.clear();
-        Drawer.setupCamera(false);
+        Drawer.setupCamera();
         // Draw self
-        this.getDrawer().draw();
+        getDrawer().draw();
         // Draw all entities
         manager.draw();
-        Drawer.setupCamera(true);
-        // Draw OSD shit here!
-        for (Drawable d : OSD) {
-            d.getDrawer().draw();
-        }
+        stage.draw();
+        super.render(delta);
     }
 
     /**
@@ -84,7 +71,7 @@ public abstract class Level extends BaseScreen implements Drawable {
         switch (idx) {
             case Movement:
                 Vector3 gyro = input.getGyro();
-                return new Vector2(-gyro.y, gyro.x);
+                return new Vector2(-gyro.y, +gyro.x);
             case Firing:
                 return control.getDisplacement();
         }

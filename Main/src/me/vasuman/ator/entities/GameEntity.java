@@ -9,9 +9,17 @@ import me.vasuman.ator.Manager;
  * Time: 6:05 PM
  */
 public abstract class GameEntity {
+    public void kill() {
+        _dead = true;
+    }
+
+    public static enum EntityType {
+        PLAYER, BULLET, OBSTACLE, GUN,
+    }
 
     private boolean _dead;
     protected int index;
+    protected EntityType identifier;
 
     public GameEntity() {
         _dead = false;
@@ -26,5 +34,8 @@ public abstract class GameEntity {
 
     public abstract void update(float delT);
 
+    public EntityType getIdentifier() {
+        return identifier;
+    }
 
 }

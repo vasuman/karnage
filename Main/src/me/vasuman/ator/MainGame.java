@@ -11,9 +11,6 @@ import me.vasuman.ator.screens.BaseScreen;
  * Time: 6:29 PM
  */
 public class MainGame extends Game {
-    public static final int resX = 640;
-    public static final int resY = 360;
-
     @Override
     public void create() {
         BaseScreen.setGame(this);

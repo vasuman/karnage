@@ -15,7 +15,7 @@ public class Wall extends PhysicalBody implements Drawable {
 
     @Override
     public void destroy() {
-
+        super.destroy();
     }
 
     // Top-left positioning
@@ -28,6 +28,7 @@ public class Wall extends PhysicalBody implements Drawable {
                 debugBox(x + w / 2, y + h / 2, w, h);
             }
         };
+        identifier = EntityType.OBSTACLE;
     }
 
     @Override

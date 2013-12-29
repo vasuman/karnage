@@ -20,14 +20,13 @@ import java.util.LinkedList;
 public class Player extends PhysicalBody implements Drawable {
     protected LinkedList<Extension> extensions = new LinkedList<Extension>();
     protected Drawer drawer;
-    protected Vector2 fire = new Vector2();
 
     @Override
     public Drawer getDrawer() {
         return drawer;
     }
 
-    public static final float speed = 0.5f;
+    public static final float speed = 0.7f;
     public static final int size = 16;
 
     public Player(float x, float y) {
@@ -42,10 +41,12 @@ public class Player extends PhysicalBody implements Drawable {
             }
         };
         super.setDamping(0.5f);
+        identifier = EntityType.PLAYER;
     }
 
     @Override
     public void destroy() {
+        super.destroy();
     }
 
     public void addExtension(Extension ext) {
@@ -55,10 +56,8 @@ public class Player extends PhysicalBody implements Drawable {
 
     @Override
     public void update(float delT) {
-        Vector2 movement = Manager.level.getVector(Level.VectorType.Movement),
-                firing = Manager.level.getVector(Level.VectorType.Firing);
+        Vector2 movement = Manager.level.getVector(Level.VectorType.Movement);
         movement.scl(speed);
         pushBody(movement);
-        fire.set(firing);
     }
 }
