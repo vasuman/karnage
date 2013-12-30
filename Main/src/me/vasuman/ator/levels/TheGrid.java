@@ -9,10 +9,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.Physics;
+import me.vasuman.ator.debug.TightPlayer;
 import me.vasuman.ator.entities.GameEntity;
 import me.vasuman.ator.entities.Gun;
 import me.vasuman.ator.entities.Player;
 import me.vasuman.ator.entities.Wall;
+
+import java.text.DecimalFormat;
 
 /**
  * Ator
@@ -21,7 +24,7 @@ import me.vasuman.ator.entities.Wall;
  * Time: 7:16 PM
  */
 public class TheGrid extends Level {
-    public static final float CAM_ELEVATION = 150f;
+    public static final float CAM_ELEVATION = 250f;
     public static final float MOTION_IMPACT = -0.3f;
     public static final float LPF_ALPHA = 0.93f;
     private Drawer drawer;
@@ -59,7 +62,7 @@ public class TheGrid extends Level {
         walls[1] = new Wall(0, 0, L_WIDTH, 5);
         walls[2] = new Wall(L_WIDTH, 0, 5, L_HEIGHT);
         walls[3] = new Wall(0, L_HEIGHT, L_WIDTH, 5);
-        player = new Player(L_WIDTH / 2, L_HEIGHT / 2);
+        player = new TightPlayer(L_WIDTH / 2, L_HEIGHT / 2);
         player.addExtension(new Gun(20, 10));
         updateCamera();
         Physics.ContactCallback bulletHit = new Physics.ContactCallback() {
@@ -101,6 +104,8 @@ public class TheGrid extends Level {
         basePosition.add(boundVector);
         return basePosition;
     }
+
+    private static DecimalFormat format = new DecimalFormat("0.00");
 
     @Override
     public void update(float delT) {

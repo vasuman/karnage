@@ -2,6 +2,7 @@ package me.vasuman.ator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -9,6 +10,8 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+
+import java.util.ArrayList;
 
 /**
  * Ator
@@ -23,12 +26,15 @@ public abstract class Drawer {
     public static final int VERTEX_RES = 1000;
 
     protected static SpriteBatch spriteDraw;
+    protected static BitmapFont font;
     protected static ShapeRenderer shapeDraw;
     protected static GL20 glCtx;
     protected static final Environment environment = new Environment();
     protected static PerspectiveCamera perspectiveCamera;
 
     protected static ModelBatch modelDraw = new ModelBatch();
+
+    private static ArrayList<FrameBuffer> buffers = new ArrayList<FrameBuffer>();
 
     public static void init(int width, int height) {
         perspectiveCamera = new PerspectiveCamera(FOV, width, height);
@@ -38,8 +44,13 @@ public abstract class Drawer {
         shapeDraw = new ShapeRenderer(VERTEX_RES);
         glCtx = Gdx.graphics.getGL20();
         modelDraw = new ModelBatch();
+        clearBuffers();
         environment.clear();
         glCtx.glEnable(GL20.GL_DEPTH_TEST);
+    }
+
+    public static void setFont(BitmapFont font) {
+        Drawer.font = font;
     }
 
     public static PerspectiveCamera getPerspectiveCamera() {
@@ -50,7 +61,7 @@ public abstract class Drawer {
         return environment;
     }
 
-    public static void clear() {
+    public static void clearScreen() {
         glCtx.glClearColor(0, 0, 0, 0);
         glCtx.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
@@ -108,16 +119,41 @@ public abstract class Drawer {
         modelDraw.end();
     }
 
-    public static Texture drawCircleTexture(int radius, Color color) {
-        FrameBuffer buffer = new FrameBuffer(Pixmap.Format.RGBA8888, 2 * radius, 2 * radius, false);
+    protected static void resetProjection(int width, int height) {
+        OrthographicCamera camera = new OrthographicCamera(width, height);
+        camera.setToOrtho(true, width, height);
+        camera.position.set(0, 0, 0);
+        camera.update();
+        shapeDraw.setProjectionMatrix(camera.combined);
+        spriteDraw.setProjectionMatrix(camera.combined);
+    }
+
+
+    public static Texture preDraw(Drawer d, int w, int h) {
+        FrameBuffer buffer = new FrameBuffer(Pixmap.Format.RGBA4444, w, h, false);
+        resetProjection(w, h);
         buffer.begin();
-        shapeDraw.setProjectionMatrix(new OrthographicCamera(2 * radius, 2 * radius).combined);
-        shapeDraw.setColor(color);
-        clear();
-        shapeDraw.begin(ShapeRenderer.ShapeType.Filled);
-        shapeDraw.circle(0, 0, radius);
-        shapeDraw.end();
+        clearScreen();
+        d.draw();
         buffer.end();
         return buffer.getColorBufferTexture();
+    }
+
+    private static void clearBuffers() {
+        for (FrameBuffer buffer : buffers) {
+            buffer.dispose();
+        }
+        buffers.clear();
+    }
+
+    protected void drawText(String text, float x, float y) {
+        BitmapFont.TextBounds bounds = getBounds(text);
+        spriteDraw.begin();
+        font.draw(spriteDraw, text, x - bounds.width / 2, y + bounds.height / 2);
+        spriteDraw.end();
+    }
+
+    public static BitmapFont.TextBounds getBounds(String text) {
+        return font.getBounds(text);
     }
 }

@@ -33,18 +33,11 @@ public abstract class BaseScreen implements Screen {
         Drawer.init(resX, resY);
         stage = new Stage(resX, resY, true);
         Gdx.input.setInputProcessor(stage);
-    }
-
-    public void transit(BaseScreen next) {
-        game.setScreen(next);
-    }
-
-    public void setAsCurrent() {
+        Screen current = game.getScreen();
+        if (current != null) {
+            current.dispose();
+        }
         game.setScreen(this);
-    }
-
-    public Screen getScreen() {
-        return game.getScreen();
     }
 
     @Override

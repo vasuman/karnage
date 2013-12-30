@@ -9,6 +9,10 @@ package me.vasuman.ator.entities;
 public abstract class Extension extends GameEntity {
     protected Player player;
 
+    public Extension() {
+        super();
+    }
+
     public void claim(Player player) {
         this.player = player;
     }

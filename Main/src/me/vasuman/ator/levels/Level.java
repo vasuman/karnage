@@ -1,12 +1,10 @@
 package me.vasuman.ator.levels;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import me.vasuman.ator.Drawable;
-import me.vasuman.ator.Drawer;
-import me.vasuman.ator.Manager;
-import me.vasuman.ator.Physics;
-import me.vasuman.ator.iface.InputController;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import me.vasuman.ator.*;
 import me.vasuman.ator.iface.RadialControl;
 import me.vasuman.ator.screens.BaseScreen;
 import me.vasuman.ator.util.Point;
@@ -21,7 +19,6 @@ public abstract class Level extends BaseScreen implements Drawable {
     public static final Point STICK_POS = new Point(1100, 120);
     public static final int STICK_SIZE = 110;
     private Manager manager;
-    private InputController input;
     private Physics physics;
     private RadialControl control;
 
@@ -36,13 +33,22 @@ public abstract class Level extends BaseScreen implements Drawable {
         manager = Manager.getInstance();
         manager.init(this);
 
-        input = new InputController();
-
         control = new RadialControl(STICK_POS.x, STICK_POS.y, STICK_SIZE);
         stage.addActor(control);
 
         physics = Physics.getInstance();
         physics.init();
+
+        MainGame.rotationProvider.calibrate();
+
+        //DEBUG!!
+        Actor button = new Actor();
+        button.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                super.clicked(event, x, y);
+            }
+        });
     }
 
     @Override
@@ -51,7 +57,7 @@ public abstract class Level extends BaseScreen implements Drawable {
         physics.update(delta);
         manager.update(delta);
         update(delta);
-        Drawer.clear();
+        Drawer.clearScreen();
         Drawer.setupCamera();
         // Draw self
         getDrawer().draw();
@@ -70,12 +76,12 @@ public abstract class Level extends BaseScreen implements Drawable {
     public Vector2 getVector(VectorType idx) {
         switch (idx) {
             case Movement:
-                Vector3 gyro = input.getGyro();
-                return new Vector2(-gyro.y, +gyro.x);
+                float[] rotation = MainGame.rotationProvider.getRotation();
+                return new Vector2(rotation[0], -rotation[1]);
             case Firing:
                 return control.getDisplacement();
         }
-        assert false;
+
         return null;
     }
 

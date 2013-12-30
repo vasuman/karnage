@@ -27,6 +27,7 @@ public class Gun extends Extension {
     private int counter;
 
     public Gun(int timeout, float height) {
+        super();
         counter = 0;
         this.timeout = timeout;
         this.height = height;
@@ -56,7 +57,8 @@ public class Gun extends Extension {
 
     // Can be overridden
     protected void fire() {
-        Vector3 position = new Vector3(direction.x * 2 * player.size, direction.y * 2 * player.size, height);
+        Vector2 posProjection = direction.cpy().scl(2 * player.size);
+        Vector3 position = new Vector3(posProjection, height);
         position.add(new Vector3(player.getPosition(), 0));
         new Bullet(position, direction.cpy().scl(bulletSpeed), bulletModel, bulletSize);
     }

@@ -26,7 +26,7 @@ public class Player extends PhysicalBody implements Drawable {
         return drawer;
     }
 
-    public static final float speed = 0.7f;
+    public static final float speed = 1.5f;
     public static final int size = 16;
 
     public Player(float x, float y) {
@@ -40,7 +40,7 @@ public class Player extends PhysicalBody implements Drawable {
                 drawModelAt(model, position);
             }
         };
-        super.setDamping(0.5f);
+        super.setDamping(0.4f);
         identifier = EntityType.PLAYER;
     }
 

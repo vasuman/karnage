@@ -25,7 +25,13 @@ public class RadialControl extends Actor {
         x = getWidth() / 2;
         y = getHeight() / 2;
         this.limit = limit;
-        texture = Drawer.drawCircleTexture(limit, new Color(0.8f, 0.5f, 0.5f, 0.5f));
+        texture = Drawer.preDraw(new Drawer() {
+            @Override
+            public void draw() {
+                debugColor(new Color(0.55f, 0.2f, 0.4f, 0.5f));
+                debugCircle(0, 0, limit);
+            }
+        }, 2 * limit, 2 * limit);
         addListener(new InputListener() {
             private float magnitude(float x, float y) {
                 return (float) Math.sqrt(x * x + y * y);
