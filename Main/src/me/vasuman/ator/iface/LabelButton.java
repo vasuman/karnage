@@ -22,7 +22,7 @@ public class LabelButton extends Actor {
         final BitmapFont.TextBounds bounds = Drawer.getBounds(text);
         final float width = bounds.width + padW;
         final float height = bounds.height + padH;
-        setBounds(x, y, width, height);
+        setBounds(x - width / 2, y - height / 2, width, height);
         texture = Drawer.preDraw(new Drawer() {
             @Override
             public void draw() {
@@ -35,6 +35,6 @@ public class LabelButton extends Actor {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        batch.draw(texture, getX() - getWidth() / 2, getY() - getHeight() / 2);
+        batch.draw(texture, getX(), getY());
     }
 }

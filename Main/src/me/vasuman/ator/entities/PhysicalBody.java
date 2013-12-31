@@ -57,11 +57,13 @@ public abstract class PhysicalBody extends GameEntity {
     }
 
     public Vector2 getVelocity() {
-        return body.getPosition().scl(Physics.scale);
+        return body.getLinearVelocity().scl(Physics.scale);
     }
 
-    protected void setVelocity(Vector2 velocity) {
-        body.setLinearVelocity(velocity.scl(Physics.scale));
+    protected void setVelocity(Vector2 vel) {
+        Vector2 velocity = new Vector2(vel);
+        velocity.scl(1 / Physics.scale);
+        body.setLinearVelocity(velocity);
     }
 
     @Override

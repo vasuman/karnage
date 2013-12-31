@@ -22,8 +22,8 @@ public class Gun extends Extension {
     private final int timeout;
     private final float height;
     protected final Vector2 direction = new Vector2(1, 0);
-    private static final Model bulletModel = Drawer.basicSphere(bulletSize, ColorAttribute.createDiffuse(Color.YELLOW));
-    public static final float bulletSpeed = 0.5f;
+    private final Model bulletModel = Drawer.basicSphere(bulletSize, ColorAttribute.createDiffuse(Color.YELLOW));
+    public static final float bulletSpeed = 500f;
     private int counter;
 
     public Gun(int timeout, float height) {
@@ -41,16 +41,15 @@ public class Gun extends Extension {
 
     @Override
     public void update(float delT) {
+        if (counter-- > 0) {
+            return;
+        }
         Vector2 rotation = Manager.level.getVector(Level.VectorType.Firing);
         if (rotation.x == 0 && rotation.y == 0) {
             return;
         }
         rotation.nor();
         direction.set(rotation);
-        if (counter-- > 0) {
-            return;
-        }
-
         counter = timeout;
         this.fire();
     }
@@ -60,6 +59,7 @@ public class Gun extends Extension {
         Vector2 posProjection = direction.cpy().scl(2 * player.size);
         Vector3 position = new Vector3(posProjection, height);
         position.add(new Vector3(player.getPosition(), 0));
-        new Bullet(position, direction.cpy().scl(bulletSpeed), bulletModel, bulletSize);
+        Vector2 bulletDir = direction.cpy().scl(bulletSpeed).add(player.getVelocity());
+        new Bullet(position, bulletDir, bulletModel, bulletSize);
     }
 }

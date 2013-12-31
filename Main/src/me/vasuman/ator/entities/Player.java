@@ -26,21 +26,20 @@ public class Player extends PhysicalBody implements Drawable {
         return drawer;
     }
 
-    public static final float speed = 1.5f;
+    public static final float speed = 18.5f;
     public static final int size = 16;
 
     public Player(float x, float y) {
         super(x, y, size, size, false);
         drawer = new Drawer() {
             private Model model = basicCube(size, ColorAttribute.createDiffuse(0, 0, 1, 1));
-
             @Override
             public void draw() {
                 Vector3 position = new Vector3(getPosition(), 0);
                 drawModelAt(model, position);
             }
         };
-        super.setDamping(0.4f);
+        super.setDamping(0.8f);
         identifier = EntityType.PLAYER;
     }
 

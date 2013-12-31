@@ -18,8 +18,6 @@ public class SystemRotation implements MainGame.RotationProvider, SensorEventLis
     private Sensor accSensor;
     private final float[] accValues = new float[3];
     private final float[] magValues = new float[3];
-    private final float[] refAngles = new float[3];
-    private final float[] retVal = new float[3];
     private final float[] absAngles = new float[3];
     private final float[] rotMatrix = new float[9];
     /* OK! So,
@@ -57,22 +55,11 @@ public class SystemRotation implements MainGame.RotationProvider, SensorEventLis
     }
 
     @Override
-    public void calibrate() {
-        getOrientation();
-        aCopy(refAngles, absAngles);
-    }
-
-    @Override
     public float[] getRotation() {
         getOrientation();
-        postOp(retVal, absAngles, refAngles);
-        return retVal;
+        return absAngles;
     }
 
-    private void postOp(float[] result, float[] arrA, float[] arrB) {
-        result[0] = arrA[1] - arrB[1];
-        result[1] = arrA[2] - arrB[2];
-    }
 
     private void aCopy(float[] arrA, float[] arrB) {
         System.arraycopy(arrB, 0, arrA, 0, 3);

@@ -1,12 +1,9 @@
 package me.vasuman.ator.levels;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.Physics;
 import me.vasuman.ator.debug.TightPlayer;
@@ -15,8 +12,6 @@ import me.vasuman.ator.entities.Gun;
 import me.vasuman.ator.entities.Player;
 import me.vasuman.ator.entities.Wall;
 
-import java.text.DecimalFormat;
-
 /**
  * Ator
  * User: vasuman
@@ -24,17 +19,13 @@ import java.text.DecimalFormat;
  * Time: 7:16 PM
  */
 public class TheGrid extends Level {
-    public static final float CAM_ELEVATION = 250f;
-    public static final float MOTION_IMPACT = -0.3f;
-    public static final float LPF_ALPHA = 0.93f;
     private Drawer drawer;
-    private Player player;
     private static final int VERTICAL_SP = 32;
     private static final int HORIZONTAL_SP = 32;
     public static final int L_WIDTH = 5000;
     public static final int L_HEIGHT = 3000;
 
-    public TheGrid() {
+    public TheGrid(boolean flag) {
         super();
         drawer = new Drawer() {
             @Override
@@ -48,6 +39,7 @@ public class TheGrid extends Level {
                     float posY = i * VERTICAL_SP;
                     debugLine(0, posY, L_WIDTH, posY);
                 }
+                debugBox(tapVector.x, tapVector.y, 5, 5);
             }
         };
 
@@ -57,14 +49,18 @@ public class TheGrid extends Level {
         environment.add(new DirectionalLight().set(0.7f, 1, 1, -0.6f, -1, 0));
 
         // Init Walls
-        Wall[] walls = new Wall[4];
-        walls[0] = new Wall(0, 0, 5, L_HEIGHT);
-        walls[1] = new Wall(0, 0, L_WIDTH, 5);
-        walls[2] = new Wall(L_WIDTH, 0, 5, L_HEIGHT);
-        walls[3] = new Wall(0, L_HEIGHT, L_WIDTH, 5);
-        player = new TightPlayer(L_WIDTH / 2, L_HEIGHT / 2);
-        player.addExtension(new Gun(20, 10));
-        updateCamera();
+        new Wall(0, 0, 5, L_HEIGHT);
+        new Wall(0, 0, L_WIDTH, 5);
+        new Wall(L_WIDTH, 0, 5, L_HEIGHT);
+        new Wall(0, L_HEIGHT, L_WIDTH, 5);
+
+        if (flag) {
+            player = new TightPlayer(L_WIDTH / 2, L_HEIGHT / 2);
+        } else {
+
+            player = new Player(L_WIDTH / 2, L_HEIGHT / 2);
+        }
+        player.addExtension(new Gun(5, 0));
         Physics.ContactCallback bulletHit = new Physics.ContactCallback() {
             @Override
             public boolean handleCollision(GameEntity entA, GameEntity entB) {
@@ -80,35 +76,8 @@ public class TheGrid extends Level {
         return drawer;
     }
 
-    private void updateCamera() {
-        PerspectiveCamera camera = Drawer.getPerspectiveCamera();
-        Vector2 playerPosition = player.getPosition();
-        Vector2 moveVector = getVector(VectorType.Movement);
-        moveVector.scl(MOTION_IMPACT * CAM_ELEVATION);
-        Vector3 newPosition = wrapSphere(playerPosition, moveVector, CAM_ELEVATION);
-        LPFSet(camera.position, newPosition);
-        camera.lookAt(new Vector3(playerPosition, 0));
-        camera.up.set(0, 1, 0);
-    }
-
-    private void LPFSet(Vector3 vecA, Vector3 vecB) {
-        vecA.scl(LPF_ALPHA);
-        vecA.add(new Vector3(vecB).scl(1 - LPF_ALPHA));
-    }
-
-
-    private Vector3 wrapSphere(Vector2 center, Vector2 shift, float elevation) {
-        Vector3 basePosition = new Vector3(center, 0);
-        Vector3 boundVector = new Vector3(shift, elevation);
-        boundVector.limit(elevation);
-        basePosition.add(boundVector);
-        return basePosition;
-    }
-
-    private static DecimalFormat format = new DecimalFormat("0.00");
-
     @Override
     public void update(float delT) {
-        updateCamera();
+
     }
 }

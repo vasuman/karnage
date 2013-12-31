@@ -18,18 +18,18 @@ public class MenuScreen extends BaseScreen {
 
     public MenuScreen() {
         super();
-        Actor startButton1 = new LabelButton("Mode 1", resX / 2, 200);
+        Actor startButton1 = new LabelButton("Tight 1", 640, 200);
         startButton1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                new TheGrid();
+                new TheGrid(true);
             }
         });
-        Actor startButton2 = new LabelButton("Mode 2", resX / 2, 400);
+        Actor startButton2 = new LabelButton("Loose", 640, 400);
         startButton2.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                new TheGrid();
+                new TheGrid(false);
             }
         });
         stage.addActor(startButton1);
