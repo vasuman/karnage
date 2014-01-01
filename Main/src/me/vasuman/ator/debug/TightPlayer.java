@@ -15,8 +15,8 @@ import me.vasuman.ator.levels.Level;
 public class TightPlayer extends Player {
     public static final float velocity = 400f;
 
-    public TightPlayer(float x, float y) {
-        super(x, y);
+    public TightPlayer(float x, float y, float size) {
+        super(x, y, size);
     }
 
     @Override

@@ -27,10 +27,11 @@ public class Player extends PhysicalBody implements Drawable {
     }
 
     public static final float speed = 18.5f;
-    public static final int size = 16;
+    public float size;
 
-    public Player(float x, float y) {
+    public Player(float x, float y, final float size) {
         super(x, y, size, size, false);
+        this.size = size;
         drawer = new Drawer() {
             private Model model = basicCube(size, ColorAttribute.createDiffuse(0, 0, 1, 1));
             @Override

@@ -11,6 +11,7 @@ import me.vasuman.ator.entities.GameEntity;
 import me.vasuman.ator.entities.Gun;
 import me.vasuman.ator.entities.Player;
 import me.vasuman.ator.entities.Wall;
+import me.vasuman.ator.util.Shape;
 
 /**
  * Ator
@@ -19,6 +20,8 @@ import me.vasuman.ator.entities.Wall;
  * Time: 7:16 PM
  */
 public class TheGrid extends Level {
+
+    private SpawnManager spawnManager;
     private Drawer drawer;
     private static final int VERTICAL_SP = 32;
     private static final int HORIZONTAL_SP = 32;
@@ -55,20 +58,24 @@ public class TheGrid extends Level {
         new Wall(0, L_HEIGHT, L_WIDTH, 5);
 
         if (flag) {
-            player = new TightPlayer(L_WIDTH / 2, L_HEIGHT / 2);
+            player = new TightPlayer(L_WIDTH / 2, L_HEIGHT / 2, 16);
         } else {
-
-            player = new Player(L_WIDTH / 2, L_HEIGHT / 2);
+            player = new Player(L_WIDTH / 2, L_HEIGHT / 2, 16);
         }
         player.addExtension(new Gun(5, 0));
         Physics.ContactCallback bulletHit = new Physics.ContactCallback() {
             @Override
             public boolean handleCollision(GameEntity entA, GameEntity entB) {
                 entA.kill();
+                if (entB.getIdentifier() == GameEntity.EntityType.GLOB) {
+                    entB.kill();
+                }
                 return true;
             }
         };
         Physics.getInstance().registerListener(GameEntity.EntityType.BULLET, bulletHit);
+
+        spawnManager = new SpawnManager(10, new Shape.Rectangle(500, 500, 500, 500), new Shape.Rectangle(L_WIDTH - 500, L_HEIGHT - 500, 500, 500));
     }
 
     @Override
@@ -78,6 +85,6 @@ public class TheGrid extends Level {
 
     @Override
     public void update(float delT) {
-
+        spawnManager.update(delT, player.getPosition());
     }
 }

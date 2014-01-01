@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 
 import java.util.ArrayList;
 
@@ -46,7 +47,6 @@ public abstract class Drawer {
         modelDraw = new ModelBatch();
         clearBuffers();
         environment.clear();
-        glCtx.glEnable(GL20.GL_DEPTH_TEST);
     }
 
     public static void setFont(BitmapFont font) {
@@ -114,6 +114,8 @@ public abstract class Drawer {
 
     protected void drawModelAt(Model m, Vector3 position) {
         ModelInstance instance = new ModelInstance(m, position);
+        BoundingBox box = new BoundingBox();
+        instance.calculateBoundingBox(box);
         modelDraw.begin(perspectiveCamera);
         modelDraw.render(instance, environment);
         modelDraw.end();

@@ -38,6 +38,7 @@ public class MenuScreen extends BaseScreen {
 
     @Override
     public void render(float delta) {
+        Drawer.clearScreen();
         super.render(delta);
     }
 }

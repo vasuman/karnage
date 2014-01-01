@@ -14,7 +14,7 @@ public abstract class GameEntity {
     }
 
     public static enum EntityType {
-        PLAYER, BULLET, OBSTACLE, GUN,
+        PLAYER, BULLET, OBSTACLE, GUN, GLOB,
     }
 
     private boolean _dead;

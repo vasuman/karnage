@@ -22,8 +22,8 @@ import me.vasuman.ator.screens.MenuScreen;
  */
 public abstract class Level extends BaseScreen implements Drawable {
 
-    public static final float CAM_ELEVATION = 180f;
-    public static final float MOTION_IMPACT = -0.3f;
+    public static final float CAM_ELEVATION = 250f;
+    public static final float MOTION_IMPACT = -0.08f;
     public static final float LPF_ALPHA = 0.93f;
     public static final int STICK_SIZE = 110;
     private Manager manager;
