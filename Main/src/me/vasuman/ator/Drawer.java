@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 
 import java.util.ArrayList;
 
@@ -63,7 +62,7 @@ public abstract class Drawer {
 
     public static void clearScreen() {
         glCtx.glClearColor(0, 0, 0, 0);
-        glCtx.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        glCtx.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     }
 
     public static void setupCamera() {
@@ -114,8 +113,6 @@ public abstract class Drawer {
 
     protected void drawModelAt(Model m, Vector3 position) {
         ModelInstance instance = new ModelInstance(m, position);
-        BoundingBox box = new BoundingBox();
-        instance.calculateBoundingBox(box);
         modelDraw.begin(perspectiveCamera);
         modelDraw.render(instance, environment);
         modelDraw.end();
