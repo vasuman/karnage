@@ -2,7 +2,11 @@ package me.vasuman.ator.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.MainGame;
 
@@ -38,6 +42,16 @@ public abstract class BaseScreen implements Screen {
             current.dispose();
         }
         game.setScreen(this);
+    }
+
+    protected void setActorPosition(Actor actor, float x, float y) {
+        actor.setPosition(x - actor.getWidth() / 2, y - actor.getHeight() / 2);
+    }
+
+    protected MoveToAction moveWidget(Group actor, float x, float y, float delT) {
+        MoveToAction action = Actions.moveTo(x - actor.getWidth() / 2, y - actor.getHeight() / 2, delT);
+        actor.addAction(action);
+        return action;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
@@ -113,9 +114,22 @@ public abstract class Drawer {
 
     protected void drawModelAt(Model m, Vector3 position) {
         ModelInstance instance = new ModelInstance(m, position);
+        drawModelInstance(instance);
+
+    }
+
+    protected void drawModelInstance(ModelInstance instance) {
         modelDraw.begin(perspectiveCamera);
         modelDraw.render(instance, environment);
         modelDraw.end();
+    }
+
+    protected void drawModelAt(Model m, Vector3 position, Vector3 axis, float rotation) {
+        Matrix4 transform = new Matrix4();
+        transform.translate(position);
+        transform.rotate(axis, rotation);
+        ModelInstance instance = new ModelInstance(m, transform);
+        drawModelInstance(instance);
     }
 
     protected static void resetProjection(int width, int height) {

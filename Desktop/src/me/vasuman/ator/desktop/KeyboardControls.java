@@ -18,6 +18,7 @@ public class KeyboardControls implements MainGame.RotationProvider {
 
     @Override
     public float[] getRotation() {
-        return new float[]{-1, getState(Input.Keys.RIGHT) - getState(Input.Keys.LEFT), getState(Input.Keys.DOWN) - getState(Input.Keys.UP)};
+        return new float[]{-1, getState(Input.Keys.A) - getState(Input.Keys.D),
+                getState(Input.Keys.W) - getState(Input.Keys.S)};
     }
 }

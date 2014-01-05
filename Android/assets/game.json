@@ -1,0 +1,37 @@
+{
+    com.badlogic.gdx.graphics.Color: {
+        white: {
+            r: 1,
+            g: 1,
+            b: 1,
+            a: 1
+        },
+        transclucent: {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 0.5
+        }
+    },
+    com.badlogic.gdx.graphics.g2d.BitmapFont: {
+        default-font: {
+            file: tech.fnt
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+        default: {
+            down: ui/button,
+            up: ui/button,
+            font: default-font,
+            fontColor: white
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
+        default: {
+            background: ui/window,
+            stageBackground: ui/transparent-50,
+            titleFont: default-font,
+            titleFontColor: white
+        }
+    }
+}

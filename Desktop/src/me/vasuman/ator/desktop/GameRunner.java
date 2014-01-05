@@ -12,6 +12,7 @@ import me.vasuman.ator.MainGame;
  */
 public class GameRunner {
     public static void main(String args[]) {
+        BuildHook.main(args);
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width = 800;
         config.height = 450;
