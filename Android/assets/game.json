@@ -33,5 +33,16 @@
             titleFont: default-font,
             titleFontColor: white
         }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+        default: {
+            font: default-font,
+            fontColor: white
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
+        pause: {
+            imageUp: ui/pause,
+        }
     }
 }

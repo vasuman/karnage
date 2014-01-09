@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import me.vasuman.ator.screens.BaseScreen;
 import me.vasuman.ator.screens.LoadScreen;
@@ -23,7 +24,9 @@ public class MainGame extends Game implements LoadScreen.LoadCallback {
     }
 
     public static interface RotationProvider {
-        public float[] getRotation();
+        public Vector2 getVector();
+
+        public void calibrate();
     }
 
     public static RotationProvider rotation;
@@ -39,6 +42,8 @@ public class MainGame extends Game implements LoadScreen.LoadCallback {
         DefaultShader.defaultCullFace = 0;
         BaseScreen.setGame(this);
         new LoadScreen(this, new AssetDescriptor("game.json", Skin.class));
+
+        //Gdx.gl.glViewport(0, 10, 800, 450);
     }
 
     @Override

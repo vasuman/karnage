@@ -1,6 +1,7 @@
 package me.vasuman.ator.entities;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Rectangle;
 import me.vasuman.ator.Drawable;
 import me.vasuman.ator.Drawer;
 
@@ -20,7 +21,8 @@ public class Wall extends PhysicalBody implements Drawable {
 
     // Top-left positioning
     public Wall(final float x, final float y, final float w, final float h) {
-        super(x + w / 2, y + h / 2, w, h, true);
+        super(x + w / 2, y + h / 2, makeBox(w, h), true);
+        //TODO: Build models
         drawer = new Drawer() {
             @Override
             public void draw() {
@@ -29,6 +31,10 @@ public class Wall extends PhysicalBody implements Drawable {
             }
         };
         identifier = EntityType.OBSTACLE;
+    }
+
+    public Wall(Rectangle rect) {
+        this(rect.x, rect.y, rect.width, rect.height);
     }
 
     @Override

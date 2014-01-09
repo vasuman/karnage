@@ -19,7 +19,7 @@ import me.vasuman.ator.levels.Level;
  */
 
 // TODO: implement Drawable
-public class Gun extends Extension implements Drawable {
+public class TapGun extends Extension implements Drawable {
     public static final float bulletSize = 5;
     private final int timeout;
     private final float height;
@@ -29,7 +29,7 @@ public class Gun extends Extension implements Drawable {
     private int counter;
     private Drawer drawer;
 
-    public Gun(int timeout, float height) {
+    public TapGun(int timeout, float height) {
         super();
         counter = 0;
         this.timeout = timeout;
@@ -39,7 +39,7 @@ public class Gun extends Extension implements Drawable {
 
             @Override
             public void draw() {
-                drawModelAt(model, new Vector3(player.getPosition(), player.height * 2), Vector3.Z, direction.angle());
+                drawModelAt(model, new Vector3(player.getPosition(), 8), Vector3.Z, direction.angle());
             }
         };
         identifier = EntityType.GUN;
@@ -67,7 +67,7 @@ public class Gun extends Extension implements Drawable {
 
     // Can be overridden
     protected void fire() {
-        Vector2 posProjection = direction.cpy().scl(2 * player.size);
+        Vector2 posProjection = direction.cpy().scl(2 * player.getSize());
         Vector3 position = new Vector3(posProjection, height);
         position.add(new Vector3(player.getPosition(), 0));
         Vector2 bulletDir = direction.cpy().scl(bulletSpeed).add(player.getVelocity());

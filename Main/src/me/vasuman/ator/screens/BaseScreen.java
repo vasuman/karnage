@@ -3,10 +3,7 @@ package me.vasuman.ator.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.MainGame;
 
@@ -34,8 +31,22 @@ public abstract class BaseScreen implements Screen {
         paused = false;
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
-        Drawer.init(resX, resY);
         stage = new Stage(resX, resY, true);
+        Drawer.init(resX, resY);
+        /**
+         float aspectRatio = (float) width / height;
+         float defaultRatio = (float) resX / resY;
+         if(aspectRatio > defaultRatio) {
+         int viewWidth = (int) (defaultRatio * height);
+         System.out.println(width - viewWidth);
+         stage.setViewport(resX, resY, true, (width - viewWidth) / 2, 0, viewWidth, height);
+         Drawer.init(width, height);
+         } else if(aspectRatio < defaultRatio) {
+         Drawer.init(resX, resY);
+         //stage.setViewport();
+         } else {
+         }
+         */
         Gdx.input.setInputProcessor(stage);
         Screen current = game.getScreen();
         if (current != null) {
@@ -48,11 +59,6 @@ public abstract class BaseScreen implements Screen {
         actor.setPosition(x - actor.getWidth() / 2, y - actor.getHeight() / 2);
     }
 
-    protected MoveToAction moveWidget(Group actor, float x, float y, float delT) {
-        MoveToAction action = Actions.moveTo(x - actor.getWidth() / 2, y - actor.getHeight() / 2, delT);
-        actor.addAction(action);
-        return action;
-    }
 
     @Override
     public void resize(int width, int height) {

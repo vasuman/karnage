@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import com.badlogic.gdx.math.Vector2;
 import me.vasuman.ator.MainGame;
 
 /**
@@ -13,13 +14,15 @@ import me.vasuman.ator.MainGame;
  * Time: 9:48 PM
  */
 public class SystemRotation implements MainGame.RotationProvider, SensorEventListener {
-    private SensorManager sensorManager;
     private Sensor magSensor;
     private Sensor accSensor;
+
     private final float[] accValues = new float[3];
     private final float[] magValues = new float[3];
-    private final float[] absAngles = new float[3];
     private final float[] rotMatrix = new float[9];
+
+    private final float[] absAngles = new float[3];
+    private final float[] fixAngles = new float[3];
     /* OK! So,
      * Now I have two ways to hold the device
      * 1st as originally planned -- flat on a surface style
@@ -28,11 +31,10 @@ public class SystemRotation implements MainGame.RotationProvider, SensorEventLis
      */
 
     public SystemRotation(SensorManager manager) {
-        sensorManager = manager;
-        magSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        accSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, accSensor, SensorManager.SENSOR_DELAY_GAME);
-        sensorManager.registerListener(this, magSensor, SensorManager.SENSOR_DELAY_GAME);
+        magSensor = manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        accSensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        manager.registerListener(this, accSensor, SensorManager.SENSOR_DELAY_GAME);
+        manager.registerListener(this, magSensor, SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -55,11 +57,15 @@ public class SystemRotation implements MainGame.RotationProvider, SensorEventLis
     }
 
     @Override
-    public float[] getRotation() {
+    public Vector2 getVector() {
         getOrientation();
-        return absAngles;
+        return new Vector2(absAngles[1] - fixAngles[1], fixAngles[2] - absAngles[2]);
     }
 
+    @Override
+    public void calibrate() {
+        aCopy(fixAngles, absAngles);
+    }
 
     private void aCopy(float[] arrA, float[] arrB) {
         System.arraycopy(arrB, 0, arrA, 0, 3);

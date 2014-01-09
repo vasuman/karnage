@@ -13,33 +13,41 @@ import me.vasuman.ator.Physics;
 public abstract class PhysicalBody extends GameEntity {
     protected Body body;
 
-    protected PhysicalBody(float x, float y, float w, float h, boolean fixed) {
-        body = createBody(x, y, fixed);
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(w / Physics.scale, h / Physics.scale);
-        createFixture(body, shape);
-        body.setUserData(this);
-    }
 
-    protected PhysicalBody(float x, float y, float r, boolean fixed) {
-        body = createBody(x, y, fixed);
+    protected static Shape makeCircle(float r) {
         CircleShape shape = new CircleShape();
         shape.setRadius(r / Physics.scale);
-        createFixture(body, shape);
-        body.setUserData(this);
+        return shape;
     }
 
-    private Fixture createFixture(Body b, Shape shape) {
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        return b.createFixture(fixtureDef);
+    protected static Shape makeBox(float w, float h) {
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(w / (2 * Physics.scale), h / (2 * Physics.scale));
+        return shape;
     }
 
-    private Body createBody(float x, float y, boolean fixed) {
+    public static Shape makeTriangle(float size) {
+        size /= Physics.scale;
+        float x = (float) Math.cos(Math.PI / 6) * size;
+        float y = (float) Math.sin(Math.PI / 6) * size;
+        PolygonShape shape = new PolygonShape();
+        shape.set(new Vector2[]{
+                new Vector2(0, size),
+                new Vector2(x, -y),
+                new Vector2(-x, -y)
+        });
+        return shape;
+    }
+
+    protected PhysicalBody(float x, float y, Shape shape, boolean fixed) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = (fixed) ? BodyDef.BodyType.StaticBody : BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(x / Physics.scale, y / Physics.scale);
-        return Physics.getInstance().addBody(bodyDef);
+        body = Physics.getInstance().addBody(bodyDef);
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        body.createFixture(fixtureDef);
+        body.setUserData(this);
     }
 
     // TODO: Add constructor with BodyDef and FixtureDef

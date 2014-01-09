@@ -16,7 +16,7 @@ public class Bullet extends PhysicalBody implements Drawable {
     protected Drawer drawer;
 
     public Bullet(final Vector3 position, Vector2 velocity, final Model m, final float size) {
-        super(position.x, position.y, size, false);
+        super(position.x, position.y, makeCircle(size), false);
         drawer = new Drawer() {
             @Override
             public void draw() {

@@ -2,6 +2,7 @@ package me.vasuman.ator.desktop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Vector2;
 import me.vasuman.ator.MainGame;
 
 /**
@@ -17,8 +18,13 @@ public class KeyboardControls implements MainGame.RotationProvider {
     }
 
     @Override
-    public float[] getRotation() {
-        return new float[]{-1, getState(Input.Keys.A) - getState(Input.Keys.D),
-                getState(Input.Keys.W) - getState(Input.Keys.S)};
+    public Vector2 getVector() {
+        return new Vector2(getState(Input.Keys.A) - getState(Input.Keys.D),
+                getState(Input.Keys.W) - getState(Input.Keys.S));
+    }
+
+    @Override
+    public void calibrate() {
+
     }
 }

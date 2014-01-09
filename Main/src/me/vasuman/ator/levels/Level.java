@@ -3,10 +3,12 @@ package me.vasuman.ator.levels;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import me.vasuman.ator.*;
 import me.vasuman.ator.entities.Player;
 import me.vasuman.ator.screens.BaseScreen;
@@ -20,36 +22,25 @@ import me.vasuman.ator.screens.MenuScreen;
  */
 public abstract class Level extends BaseScreen implements Drawable {
 
-
-    public static final int STICK_SIZE = 110;
     private Manager manager;
     private Physics physics;
     protected Player player;
-    private Vector2 touchPosition;
-    private boolean touched;
-    private boolean tap;
-    private Vector2 baseVector;
-
+    private CustomInputListener tapListen;
+    private Window pauseWindow;
+    private Label resumeCounter;
+    private boolean instigate = false;
 
     public static enum VectorType {
         Movement, Firing, CamShift
     }
 
-
     public Level() {
         super();
-
-        tap = false;
-        touched = false;
-        touchPosition = new Vector2();
-
-        baseVector = new Vector2();
-        baseVector = getVector(VectorType.CamShift);
-
         manager = Manager.getInstance();
         manager.init(this);
         Gdx.input.setCatchBackKey(true);
         Gdx.input.setCatchMenuKey(true);
+        MainGame.rotation.calibrate();
 
         InputListener backListen = new InputListener() {
             @Override
@@ -63,52 +54,120 @@ public abstract class Level extends BaseScreen implements Drawable {
         };
         stage.addListener(backListen);
 
-        InputListener tapListen = new InputListener() {
+        tapListen = new CustomInputListener(Drawer.getPerspectiveCamera());
+        Skin skin = MainGame.assets.get("game.json", Skin.class);
+        Label fpsCount = new Label("", skin);
+        fpsCount.setPosition(100, 100);
+        fpsCount.addAction(new Action() {
             @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                touched = false;
-                tap = true;
-                super.touchUp(event, x, y, pointer, button);
+            public boolean act(float delta) {
+                Label actor = (Label) getActor();
+                actor.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
+                return false;
             }
-
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                super.touchDragged(event, x, y, pointer);
-            }
-
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                touched = true;
-                tap = false;
-                setTouch(x, y);
-                return true;
-            }
-
-            private void setTouch(float x, float y) {
-                touchPosition.set(getPlanarZ(Drawer.getPerspectiveCamera().getPickRay(x, height - y, 0, 0, resX, resY)));
-            }
-        };
+        });
+        stage.addActor(fpsCount);
         stage.addListener(tapListen);
+
+        pauseWindow = new Window("Paused", skin);
+        pauseWindow.setSize(800, 480);
+        pauseWindow.padTop(100);
+        pauseWindow.padBottom(50);
+        pauseWindow.setKeepWithinStage(false);
+
+        TextButton resumeButton = new TextButton("Resume", skin);
+        resumeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                instigate = true;
+                resume();
+            }
+        });
+        pauseWindow.add(resumeButton);
+        pauseWindow.top();
+
+        resumeCounter = new Label("", skin);
+        setActorPosition(resumeCounter, 640, 360);
+
+
+        ImageButton pauseButton = new ImageButton(skin, "pause");
+        setActorPosition(pauseButton, 1240, 650);
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                pause();
+            }
+        });
+        stage.addActor(pauseButton);
 
         physics = Physics.getInstance();
         physics.init();
         //DEBUG!!
     }
 
-    private Vector2 getPlanarZ(Ray pickRay) {
-        float distance = -pickRay.origin.z / pickRay.direction.z;
-        Vector3 vector = new Vector3();
-        pickRay.getEndPoint(vector, distance);
-        return new Vector2(vector.x, vector.y);
+
+    @Override
+    public void pause() {
+        if (paused) {
+            return;
+        }
+        super.pause();
+        pauseWindow.setPosition(240, -480);
+        pauseWindow.addAction(Actions.moveTo(240, 70, 0.5f));
+        stage.addActor(pauseWindow);
     }
 
+    @Override
+    public void resume() {
+        if (!instigate) {
+            return;
+        }
+        instigate = false;
+        pauseWindow.addAction(Actions.sequence(Actions.moveTo(240, -480, 0.5f), new Action() {
+            @Override
+            public boolean act(float delta) {
+                pauseWindow.remove();
+                resumeCounter.addAction(Actions.sequence(
+                        new Action() {
+                            private float count = 4;
+                            private float rate = 1;
+
+                            @Override
+                            public boolean act(float delta) {
+                                if (count <= 0) {
+                                    return true;
+                                }
+                                ((Label) getActor()).setText("" + (int) count);
+                                count -= rate * delta;
+                                return false;
+                            }
+                        },
+                        new Action() {
+                            @Override
+                            public boolean act(float delta) {
+                                getActor().remove();
+                                // Clear all taps!!
+                                // KINDA hackish!
+                                tapListen.getTapDirection(new Vector2());
+                                Level.super.resume();
+                                return true;
+                            }
+                        }
+                ));
+                stage.addActor(resumeCounter);
+                return true;
+            }
+        }));
+    }
 
     @Override
     public void render(float delta) {
         // TODO: fix delta
-        physics.update(delta);
-        manager.update(delta);
-        update(delta);
+        if (!paused) {
+            physics.update(delta);
+            manager.update(delta);
+            update(delta);
+        }
         Drawer.clearScreen();
         updateCamera();
         Drawer.setupCamera();
@@ -116,7 +175,6 @@ public abstract class Level extends BaseScreen implements Drawable {
         getDrawer().draw();
         // Draw all entities
         manager.draw();
-        stage.draw();
         super.render(delta);
     }
 
@@ -126,34 +184,24 @@ public abstract class Level extends BaseScreen implements Drawable {
      * @param idx [Movement] [Firing]
      * @return A direction vector
      */
+
     public Vector2 getVector(VectorType idx) {
         switch (idx) {
             case CamShift:
             case Movement:
-                float[] rotation = MainGame.rotation.getRotation();
-                return new Vector2(rotation[1], -rotation[2]).sub(baseVector);
+                return MainGame.rotation.getVector();
             case Firing:
-                return getTouchPosition();
+                return tapListen.getTapDirection(player.getPosition());
         }
         return new Vector2();
     }
 
-    private Vector2 getTouchPosition() {
-        if (!tap) {
-            return new Vector2(0, 0);
-        }
-        tap = false;
-        Vector2 result = new Vector2(touchPosition);
-        result.sub(player.getPosition());
-        return result;
-    }
-
     @Override
     public void dispose() {
-        super.dispose();
         Gdx.input.setCatchBackKey(false);
         Gdx.input.setCatchMenuKey(false);
         manager.clear();
+        super.dispose();
     }
 
     public abstract void update(float delT);

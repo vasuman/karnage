@@ -18,31 +18,46 @@ import java.util.LinkedList;
  * Time: 6:17 PM
  */
 public class Player extends PhysicalBody implements Drawable {
-    protected LinkedList<Extension> extensions = new LinkedList<Extension>();
     protected Drawer drawer;
+    protected LinkedList<Extension> extensions = new LinkedList<Extension>();
+
+    public float getSize() {
+        return def.size;
+    }
+
+    public void addExtension(Extension extension) {
+        extension.claim(this);
+        extensions.add(extension);
+    }
+
+    public static class PlayerDef {
+        public Vector2 position;
+        public float speed;
+        public float size;
+        public float damp;
+        public String modelPath;
+    }
 
     @Override
     public Drawer getDrawer() {
         return drawer;
     }
 
-    public static final float speed = 18.5f;
-    public static final float height = 3;
-    public static final float size = 16;
+    protected PlayerDef def;
 
-    public Player(float x, float y) {
-        super(x, y, size, size, false);
+    public Player(final PlayerDef def) {
+        super(def.position.x, def.position.y, makeCircle(def.size), false);
+        this.def = def;
         drawer = new Drawer() {
-            //private Model model = basicCube(size, ColorAttribute.createDiffuse(0, 0, 1, 1));
-            private Model model = MainGame.assets.get("triframe-base.g3db", Model.class);
+            private Model model = MainGame.assets.get(def.modelPath, Model.class);
 
             @Override
             public void draw() {
-                Vector3 position = new Vector3(getPosition(), height);
+                Vector3 position = new Vector3(getPosition(), 0);
                 drawModelAt(model, position);
             }
         };
-        super.setDamping(0.8f);
+        super.setDamping(def.damp);
         identifier = EntityType.PLAYER;
     }
 
@@ -51,15 +66,11 @@ public class Player extends PhysicalBody implements Drawable {
         super.destroy();
     }
 
-    public void addExtension(Extension ext) {
-        extensions.add(ext);
-        ext.claim(this);
-    }
 
     @Override
     public void update(float delT) {
         Vector2 movement = Manager.level.getVector(Level.VectorType.Movement);
-        movement.scl(-speed);
-        pushBody(movement);
+        movement.scl(-def.speed);
+        setVelocity(movement);
     }
 }

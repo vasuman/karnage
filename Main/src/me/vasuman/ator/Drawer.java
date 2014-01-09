@@ -57,6 +57,10 @@ public abstract class Drawer {
         return perspectiveCamera;
     }
 
+    public static void setViewport(int x, int y, int width, int height) {
+        glCtx.glViewport(x, y, width, height);
+    }
+
     public static Environment getEnvironment() {
         return environment;
     }
@@ -128,6 +132,14 @@ public abstract class Drawer {
         Matrix4 transform = new Matrix4();
         transform.translate(position);
         transform.rotate(axis, rotation);
+        ModelInstance instance = new ModelInstance(m, transform);
+        drawModelInstance(instance);
+    }
+
+    protected void drawModelAt(Model m, Vector3 position, float scale) {
+        Matrix4 transform = new Matrix4();
+        transform.translate(position);
+        transform.scl(scale);
         ModelInstance instance = new ModelInstance(m, transform);
         drawModelInstance(instance);
     }
