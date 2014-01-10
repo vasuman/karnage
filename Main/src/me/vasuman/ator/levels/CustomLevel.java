@@ -8,10 +8,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import me.vasuman.ator.Config;
 import me.vasuman.ator.Drawer;
+import me.vasuman.ator.MainGame;
 import me.vasuman.ator.Physics;
 import me.vasuman.ator.entities.GameEntity;
 import me.vasuman.ator.entities.Player;
-import me.vasuman.ator.entities.TapGun;
 import me.vasuman.ator.entities.Wall;
 
 import java.util.Random;
@@ -31,9 +31,9 @@ public class CustomLevel extends Level {
         public TextureRegion[] tiles;
         public Random seed;
         public Rectangle[] obstacles;
-        public Rectangle[] spawnRegions;
         public BaseLight[] lights;
         public Player.PlayerDef playerDef;
+        public float pad;
 
         public void buildBoundraies(float size) {
             obstacles = new Rectangle[4];
@@ -41,6 +41,7 @@ public class CustomLevel extends Level {
             obstacles[1] = new Rectangle(0, 0, width, size);
             obstacles[2] = new Rectangle(width - size, 0, size, height);
             obstacles[3] = new Rectangle(0, height - size, width, size);
+            pad = 2 * size;
         }
     }
 
@@ -65,7 +66,7 @@ public class CustomLevel extends Level {
             new Wall(obstacle);
         }
         player = new Player(def.playerDef);
-        spawnManager = new SpawnManager(new Rectangle(0, 0, def.width, def.height));
+        spawnManager = new SpawnManager(new Rectangle(def.pad, def.pad, def.width - def.pad, def.height - def.pad));
         drawer = new Drawer() {
             @Override
             public void draw() {
@@ -80,10 +81,11 @@ public class CustomLevel extends Level {
                     }
                 }
                 spriteDraw.end();
+                //Vector2 touch = inputListener.getPosition();
+                //debugBox(touch.x, touch.y, 10, 10);
             }
         };
         Drawer.getEnvironment().add(def.lights);
-        player.addExtension(new TapGun(1, 8));
         Physics physics = Physics.getInstance();
         physics.registerListener(GameEntity.EntityType.BULLET, new Physics.ContactCallback() {
             @Override
@@ -93,6 +95,16 @@ public class CustomLevel extends Level {
                     entB.kill();
                 }
                 return true;
+            }
+        });
+        physics.registerListener(GameEntity.EntityType.GLOB, new Physics.ContactCallback() {
+            @Override
+            public boolean handleCollision(GameEntity entA, GameEntity entB) {
+                if (entB.getIdentifier() == GameEntity.EntityType.PLAYER) {
+                    ((Player) entB).damage();
+                    //entA.kill();
+                }
+                return false;
             }
         });
     }
@@ -106,7 +118,7 @@ public class CustomLevel extends Level {
     public void updateCamera() {
         PerspectiveCamera camera = Drawer.getPerspectiveCamera();
         Vector3 playerPosition = new Vector3(player.getPosition(), 0);
-        Vector2 moveVector = getVector(VectorType.CamShift);
+        Vector2 moveVector = MainGame.rotation.getVector();
         moveVector.scl(Config.MOTION_IMPACT * Config.CAM_ELEVATION);
         LPFSet(offsetPosition, wrapSphere(moveVector, Config.CAM_ELEVATION));
         camera.position.set(playerPosition.cpy().add(offsetPosition));
@@ -115,7 +127,7 @@ public class CustomLevel extends Level {
         camera.update();
     }
 
-    private void LPFSet(Vector3 vecA, Vector3 vecB) {
+    public static void LPFSet(Vector3 vecA, Vector3 vecB) {
         vecA.scl(Config.LPF_ALPHA);
         vecA.add(new Vector3(vecB).scl(1 - Config.LPF_ALPHA));
     }

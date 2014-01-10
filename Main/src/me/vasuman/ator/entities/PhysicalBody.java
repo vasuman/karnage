@@ -14,13 +14,13 @@ public abstract class PhysicalBody extends GameEntity {
     protected Body body;
 
 
-    protected static Shape makeCircle(float r) {
+    public static Shape makeCircle(float r) {
         CircleShape shape = new CircleShape();
         shape.setRadius(r / Physics.scale);
         return shape;
     }
 
-    protected static Shape makeBox(float w, float h) {
+    public static Shape makeBox(float w, float h) {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(w / (2 * Physics.scale), h / (2 * Physics.scale));
         return shape;
@@ -49,8 +49,6 @@ public abstract class PhysicalBody extends GameEntity {
         body.createFixture(fixtureDef);
         body.setUserData(this);
     }
-
-    // TODO: Add constructor with BodyDef and FixtureDef
 
     public Vector2 getPosition() {
         return body.getPosition().scl(Physics.scale);

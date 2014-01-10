@@ -6,10 +6,6 @@ import com.badlogic.gdx.math.Vector3;
 import me.vasuman.ator.Drawable;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.MainGame;
-import me.vasuman.ator.Manager;
-import me.vasuman.ator.levels.Level;
-
-import java.util.LinkedList;
 
 /**
  * Ator
@@ -19,23 +15,23 @@ import java.util.LinkedList;
  */
 public class Player extends PhysicalBody implements Drawable {
     protected Drawer drawer;
-    protected LinkedList<Extension> extensions = new LinkedList<Extension>();
 
     public float getSize() {
         return def.size;
     }
 
-    public void addExtension(Extension extension) {
-        extension.claim(this);
-        extensions.add(extension);
+
+    public void damage() {
+
     }
 
     public static class PlayerDef {
         public Vector2 position;
-        public float speed;
+        public int health;
         public float size;
         public float damp;
         public String modelPath;
+        public Extension.ExtensionBuilder[] builders;
     }
 
     @Override
@@ -59,6 +55,10 @@ public class Player extends PhysicalBody implements Drawable {
         };
         super.setDamping(def.damp);
         identifier = EntityType.PLAYER;
+        for (Extension.ExtensionBuilder builder : def.builders) {
+            Extension extension = builder.build();
+            extension.claim(this);
+        }
     }
 
     @Override
@@ -69,8 +69,6 @@ public class Player extends PhysicalBody implements Drawable {
 
     @Override
     public void update(float delT) {
-        Vector2 movement = Manager.level.getVector(Level.VectorType.Movement);
-        movement.scl(-def.speed);
-        setVelocity(movement);
+
     }
 }

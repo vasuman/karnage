@@ -7,6 +7,10 @@ package me.vasuman.ator.entities;
  * Time: 7:50 PM
  */
 public abstract class Extension extends GameEntity {
+    public static interface ExtensionBuilder {
+        public Extension build();
+    }
+
     protected Player player;
 
     public Extension() {

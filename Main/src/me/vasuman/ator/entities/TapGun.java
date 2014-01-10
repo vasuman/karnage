@@ -9,7 +9,6 @@ import me.vasuman.ator.Drawable;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.MainGame;
 import me.vasuman.ator.Manager;
-import me.vasuman.ator.levels.Level;
 
 /**
  * Ator
@@ -20,29 +19,34 @@ import me.vasuman.ator.levels.Level;
 
 // TODO: implement Drawable
 public class TapGun extends Extension implements Drawable {
-    public static final float bulletSize = 5;
-    private final int timeout;
-    private final float height;
-    protected final Vector2 direction = new Vector2(1, 0);
-    private final Model bulletModel = Drawer.basicSphere(bulletSize, ColorAttribute.createDiffuse(Color.YELLOW));
-    public static final float bulletSpeed = 1000f;
-    private int counter;
-    private Drawer drawer;
+    public static class TapGunBuilder implements ExtensionBuilder {
+        @Override
+        public TapGun build() {
+            return new TapGun();
+        }
+    }
 
-    public TapGun(int timeout, float height) {
-        super();
-        counter = 0;
-        this.timeout = timeout;
-        this.height = height;
+    protected final Vector2 direction = new Vector2(1, 0);
+    private Drawer drawer;
+    private static Bullet.BulletDef def = new Bullet.BulletDef();
+
+    private TapGun() {
+        initBulletDef();
         drawer = new Drawer() {
             private Model model = MainGame.assets.get("canon.g3db", Model.class);
 
             @Override
             public void draw() {
-                drawModelAt(model, new Vector3(player.getPosition(), 8), Vector3.Z, direction.angle());
+                drawModelAt(model, new Vector3(player.getPosition(), 0), Vector3.Z, direction.angle());
             }
         };
         identifier = EntityType.GUN;
+    }
+
+    private void initBulletDef() {
+        def.size = 5;
+        def.speed = 1000;
+        def.model = Drawer.basicSphere(def.size, ColorAttribute.createDiffuse(Color.YELLOW));
     }
 
 
@@ -52,26 +56,21 @@ public class TapGun extends Extension implements Drawable {
 
     @Override
     public void update(float delT) {
-        if (counter-- > 0) {
+        if (!Manager.level.inputListener.getTap()) {
             return;
         }
-        Vector2 rotation = Manager.level.getVector(Level.VectorType.Firing);
-        if (rotation.x == 0 && rotation.y == 0) {
-            return;
-        }
+        Vector2 rotation = Manager.level.inputListener.getTapPosition().sub(player.getPosition());
         rotation.nor();
         direction.set(rotation);
-        counter = timeout;
         this.fire();
     }
 
     // Can be overridden
     protected void fire() {
-        Vector2 posProjection = direction.cpy().scl(2 * player.getSize());
-        Vector3 position = new Vector3(posProjection, height);
-        position.add(new Vector3(player.getPosition(), 0));
-        Vector2 bulletDir = direction.cpy().scl(bulletSpeed).add(player.getVelocity());
-        new Bullet(position, bulletDir, bulletModel, bulletSize);
+        Vector2 position = new Vector2(direction);
+        position.scl(2 * player.getSize());
+        position.add(player.getPosition());
+        new Bullet(position, direction.cpy(), def);
     }
 
     @Override

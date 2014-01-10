@@ -75,6 +75,7 @@ public abstract class Drawer {
         camera.update();
         shapeDraw.setProjectionMatrix(camera.combined);
         spriteDraw.setProjectionMatrix(camera.combined);
+        modelDraw.begin(perspectiveCamera);
     }
 
 
@@ -103,7 +104,6 @@ public abstract class Drawer {
     }
 
     public static Model basicCube(float size, ColorAttribute color) {
-        size *= 2;
         ModelBuilder builder = new ModelBuilder();
         return builder.createBox(size, size, size, new Material(color),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
@@ -118,13 +118,12 @@ public abstract class Drawer {
 
     protected void drawModelAt(Model m, Vector3 position) {
         ModelInstance instance = new ModelInstance(m, position);
-        drawModelInstance(instance);
+        modelDraw.render(instance, environment);
 
     }
 
-    protected void drawModelInstance(ModelInstance instance) {
-        modelDraw.begin(perspectiveCamera);
-        modelDraw.render(instance, environment);
+
+    public static void finishDraw() {
         modelDraw.end();
     }
 
@@ -133,7 +132,7 @@ public abstract class Drawer {
         transform.translate(position);
         transform.rotate(axis, rotation);
         ModelInstance instance = new ModelInstance(m, transform);
-        drawModelInstance(instance);
+        modelDraw.render(instance, environment);
     }
 
     protected void drawModelAt(Model m, Vector3 position, float scale) {
@@ -141,7 +140,7 @@ public abstract class Drawer {
         transform.translate(position);
         transform.scl(scale);
         ModelInstance instance = new ModelInstance(m, transform);
-        drawModelInstance(instance);
+        modelDraw.render(instance, environment);
     }
 
     protected static void resetProjection(int width, int height) {

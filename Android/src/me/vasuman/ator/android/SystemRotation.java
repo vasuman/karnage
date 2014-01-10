@@ -59,7 +59,7 @@ public class SystemRotation implements MainGame.RotationProvider, SensorEventLis
     @Override
     public Vector2 getVector() {
         getOrientation();
-        return new Vector2(absAngles[1] - fixAngles[1], fixAngles[2] - absAngles[2]);
+        return new Vector2(absAngles[1] - fixAngles[1], fixAngles[2] - absAngles[2]).limit(LIMIT);
     }
 
     @Override

@@ -6,7 +6,11 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import me.vasuman.ator.screens.BaseScreen;
 import me.vasuman.ator.util.Projection;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Ator
@@ -16,66 +20,70 @@ import me.vasuman.ator.util.Projection;
  */
 public class CustomInputListener extends InputListener {
     // TODO: Multitouch
-    private Vector2 position;
-    private boolean touch;
-    private boolean tap;
+    public static final int MAX_TOUCH = 2;
+    private HashMap<Integer, Vector2> map = new HashMap<Integer, Vector2>(MAX_TOUCH);
+
+    private Vector2 tapPosition = new Vector2();
+    private boolean tap = false;
     private Camera camera;
 
     public CustomInputListener(PerspectiveCamera camera) {
         this.camera = camera;
-        this.position = new Vector2();
     }
 
     @Override
     public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-        touch = false;
+        map.remove(pointer);
         tap = true;
+        setPosition(tapPosition, x, y);
     }
 
     @Override
     public void touchDragged(InputEvent event, float x, float y, int pointer) {
-        setTouch(x, y);
+        Vector2 position = map.get(pointer);
+        setPosition(position, x, y);
     }
 
     @Override
     public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-        if (touch) {
+        if (getTouch() >= MAX_TOUCH) {
             return false;
         }
-        touch = true;
-        tap = false;
-        setTouch(x, y);
+        Vector2 position = new Vector2();
+        map.put(pointer, position);
+        setPosition(position, x, y);
         return true;
     }
 
-    private void setTouch(float x, float y) {
+    private void setPosition(Vector2 position, float x, float y) {
+        System.out.println(x + "," + y);
         position.set(Projection.getPlanarZ(camera.getPickRay(x, Gdx.graphics.getHeight() - y,
-                0, 0, camera.viewportWidth, camera.viewportHeight)));
+                0, 0, BaseScreen.resX, BaseScreen.resY)));
     }
 
 
-    public Vector2 getTouchDirection(Vector2 relative) {
-        if (!touch) {
-            return new Vector2();
+    public int getTouch() {
+        return map.size();
+    }
+
+    public boolean getTap() {
+        if (tap) {
+            tap = false;
+            return true;
         }
-        return getDirection(relative);
+        return tap;
     }
 
-    public Vector2 getTapDirection(Vector2 relative) {
-        if (!tap) {
-            return new Vector2(0, 0);
+    public Vector2 getTapPosition() {
+        return tapPosition.cpy();
+    }
+
+    public Vector2 getPosition(int num) {
+        Iterator<Vector2> iterator = map.values().iterator();
+        while (num > 0) {
+            iterator.next();
         }
-        tap = false;
-        return getDirection(relative);
+        return new Vector2(iterator.next());
     }
 
-    public Vector2 getPosition() {
-        return new Vector2(position);
-    }
-
-    private Vector2 getDirection(Vector2 relative) {
-        Vector2 result = new Vector2(position);
-        result.sub(relative);
-        return result;
-    }
 }

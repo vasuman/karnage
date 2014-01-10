@@ -15,7 +15,7 @@ public class GameRunner {
         BuildHook.main(args);
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width = 800;
-        config.height = 450;
+        config.height = 400;
         config.useGL20 = true;
         new LwjglApplication(new MainGame(new KeyboardControls()), config);
     }

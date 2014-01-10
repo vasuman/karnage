@@ -2,8 +2,8 @@ package me.vasuman.ator.levels;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -25,14 +25,10 @@ public abstract class Level extends BaseScreen implements Drawable {
     private Manager manager;
     private Physics physics;
     protected Player player;
-    private CustomInputListener tapListen;
+    public CustomInputListener inputListener;
     private Window pauseWindow;
     private Label resumeCounter;
     private boolean instigate = false;
-
-    public static enum VectorType {
-        Movement, Firing, CamShift
-    }
 
     public Level() {
         super();
@@ -42,19 +38,19 @@ public abstract class Level extends BaseScreen implements Drawable {
         Gdx.input.setCatchMenuKey(true);
         MainGame.rotation.calibrate();
 
-        InputListener backListen = new InputListener() {
+        InputListener keyListen = new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
                 if (keycode == Input.Keys.BACK) {
-                    new MenuScreen();
+                    pause();
                     return true;
                 }
                 return false;
             }
         };
-        stage.addListener(backListen);
+        stage.addListener(keyListen);
 
-        tapListen = new CustomInputListener(Drawer.getPerspectiveCamera());
+        inputListener = new CustomInputListener(Drawer.getPerspectiveCamera());
         Skin skin = MainGame.assets.get("game.json", Skin.class);
         Label fpsCount = new Label("", skin);
         fpsCount.setPosition(100, 100);
@@ -67,12 +63,12 @@ public abstract class Level extends BaseScreen implements Drawable {
             }
         });
         stage.addActor(fpsCount);
-        stage.addListener(tapListen);
+        stage.addListener(inputListener);
 
         pauseWindow = new Window("Paused", skin);
         pauseWindow.setSize(800, 480);
         pauseWindow.padTop(100);
-        pauseWindow.padBottom(50);
+        pauseWindow.padBottom(20);
         pauseWindow.setKeepWithinStage(false);
 
         TextButton resumeButton = new TextButton("Resume", skin);
@@ -83,15 +79,32 @@ public abstract class Level extends BaseScreen implements Drawable {
                 resume();
             }
         });
-        pauseWindow.add(resumeButton);
+        pauseWindow.add(resumeButton).space(100);
+
+        TextButton quitButton = new TextButton("Quit", skin);
+        quitButton.addListener((new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                new MenuScreen();
+            }
+        }));
+        pauseWindow.add(quitButton).space(100);
+        pauseWindow.row();
+        TextButton calibrate = new TextButton("Calibrate", skin);
+        calibrate.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                MainGame.rotation.calibrate();
+            }
+        });
+        pauseWindow.add(calibrate);
         pauseWindow.top();
 
         resumeCounter = new Label("", skin);
-        setActorPosition(resumeCounter, 640, 360);
-
+        setActorPosition(resumeCounter, 640, 200);
 
         ImageButton pauseButton = new ImageButton(skin, "pause");
-        setActorPosition(pauseButton, 1240, 650);
+        pauseButton.setPosition(1200, 650);
         pauseButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -99,10 +112,8 @@ public abstract class Level extends BaseScreen implements Drawable {
             }
         });
         stage.addActor(pauseButton);
-
         physics = Physics.getInstance();
         physics.init();
-        //DEBUG!!
     }
 
 
@@ -113,7 +124,7 @@ public abstract class Level extends BaseScreen implements Drawable {
         }
         super.pause();
         pauseWindow.setPosition(240, -480);
-        pauseWindow.addAction(Actions.moveTo(240, 70, 0.5f));
+        pauseWindow.addAction(Actions.moveTo(240, 70, 0.2f));
         stage.addActor(pauseWindow);
     }
 
@@ -123,21 +134,20 @@ public abstract class Level extends BaseScreen implements Drawable {
             return;
         }
         instigate = false;
-        pauseWindow.addAction(Actions.sequence(Actions.moveTo(240, -480, 0.5f), new Action() {
+        pauseWindow.addAction(Actions.sequence(Actions.moveTo(240, -480, 0.2f), new Action() {
             @Override
             public boolean act(float delta) {
                 pauseWindow.remove();
                 resumeCounter.addAction(Actions.sequence(
                         new Action() {
-                            private float count = 4;
+                            private float count = 3;
                             private float rate = 1;
-
                             @Override
                             public boolean act(float delta) {
                                 if (count <= 0) {
                                     return true;
                                 }
-                                ((Label) getActor()).setText("" + (int) count);
+                                ((Label) getActor()).setText("" + ((int) count + 1));
                                 count -= rate * delta;
                                 return false;
                             }
@@ -148,7 +158,7 @@ public abstract class Level extends BaseScreen implements Drawable {
                                 getActor().remove();
                                 // Clear all taps!!
                                 // KINDA hackish!
-                                tapListen.getTapDirection(new Vector2());
+                                inputListener.getTap();
                                 Level.super.resume();
                                 return true;
                             }
@@ -162,11 +172,10 @@ public abstract class Level extends BaseScreen implements Drawable {
 
     @Override
     public void render(float delta) {
-        // TODO: fix delta
         if (!paused) {
             physics.update(delta);
-            manager.update(delta);
             update(delta);
+            manager.update(delta);
         }
         Drawer.clearScreen();
         updateCamera();
@@ -175,25 +184,8 @@ public abstract class Level extends BaseScreen implements Drawable {
         getDrawer().draw();
         // Draw all entities
         manager.draw();
+        Drawer.finishDraw();
         super.render(delta);
-    }
-
-    /**
-     * A function that returns a specified <b>input</b> vector that is accessed via an index
-     *
-     * @param idx [Movement] [Firing]
-     * @return A direction vector
-     */
-
-    public Vector2 getVector(VectorType idx) {
-        switch (idx) {
-            case CamShift:
-            case Movement:
-                return MainGame.rotation.getVector();
-            case Firing:
-                return tapListen.getTapDirection(player.getPosition());
-        }
-        return new Vector2();
     }
 
     @Override
@@ -202,6 +194,10 @@ public abstract class Level extends BaseScreen implements Drawable {
         Gdx.input.setCatchMenuKey(false);
         manager.clear();
         super.dispose();
+    }
+
+    public void addActor(Actor actor) {
+        stage.addActor(actor);
     }
 
     public abstract void update(float delT);

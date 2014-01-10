@@ -1,6 +1,7 @@
 package me.vasuman.ator;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
@@ -18,12 +19,22 @@ import me.vasuman.ator.screens.MenuScreen;
  */
 public class MainGame extends Game implements LoadScreen.LoadCallback {
 
+    public static int offsetX, offsetY, viewWidth, viewHeight;
+
     @Override
     public void doneLoading() {
+        /*
+        Skin skin = assets.get("game.json", Skin.class);
+        BitmapFont font = new BitmapFont(Gdx.files.internal("tech.fnt"), new TextureRegion(
+        new Texture(Gdx.files.internal("tech.png"), true)));
+        skin.add("default-font", font);
+        */
         new MenuScreen();
     }
 
     public static interface RotationProvider {
+        public static final float LIMIT = (float) Math.sqrt(2);
+
         public Vector2 getVector();
 
         public void calibrate();
@@ -41,9 +52,32 @@ public class MainGame extends Game implements LoadScreen.LoadCallback {
     public void create() {
         DefaultShader.defaultCullFace = 0;
         BaseScreen.setGame(this);
-        new LoadScreen(this, new AssetDescriptor("game.json", Skin.class));
+        new LoadScreen(this, new AssetDescriptor<Skin>("game.json", Skin.class));
+        setViewport();
+    }
 
-        //Gdx.gl.glViewport(0, 10, 800, 450);
+    public static void setViewport() {
+        int width = Gdx.graphics.getWidth();
+        int height = Gdx.graphics.getHeight();
+        float idealRatio = (float) BaseScreen.resX / BaseScreen.resY;
+        float realRatio = (float) width / height;
+        if (realRatio > idealRatio) {
+            viewHeight = height;
+            viewWidth = (int) (idealRatio * height);
+            offsetX = (width - viewWidth) / 2;
+            offsetY = 0;
+        } else if (realRatio < idealRatio) {
+            viewWidth = width;
+            viewHeight = (int) (width / idealRatio);
+            offsetX = 0;
+            offsetY = (height - viewHeight) / 2;
+        } else {
+            viewHeight = height;
+            viewWidth = width;
+            offsetX = 0;
+            offsetY = 0;
+        }
+        Gdx.gl.glViewport(offsetX, offsetY, viewWidth, viewHeight);
     }
 
     @Override

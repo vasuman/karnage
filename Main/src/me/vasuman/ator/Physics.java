@@ -26,6 +26,10 @@ public class Physics {
         public boolean handleCollision(GameEntity entA, GameEntity entB);
     }
 
+    public static interface QueryResult {
+        public boolean report(GameEntity entA);
+    }
+
     protected HashMap<GameEntity.EntityType, ContactCallback> callbackMap;
 
     public static Physics getInstance() {
@@ -86,6 +90,17 @@ public class Physics {
     public void update(float delT) {
         world.step(delT, 10, 10);
         world.clearForces();
+    }
+
+    public void queryBoundBox(Vector2 center, float radius, final QueryResult callback) {
+        center.scl(1 / scale);
+        radius /= scale;
+        world.QueryAABB(new QueryCallback() {
+            @Override
+            public boolean reportFixture(Fixture fixture) {
+                return callback.report((GameEntity) fixture.getBody().getUserData());
+            }
+        }, center.x - radius, center.y - radius, center.x + radius, center.y + radius);
     }
 
 }

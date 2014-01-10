@@ -13,18 +13,27 @@ import me.vasuman.ator.Drawer;
  * Time: 2:12 PM
  */
 public class Bullet extends PhysicalBody implements Drawable {
+    public static float HOVER = 4f;
+
+    public static class BulletDef {
+        public float speed;
+        public Model model;
+        public float size;
+    }
+
     protected Drawer drawer;
 
-    public Bullet(final Vector3 position, Vector2 velocity, final Model m, final float size) {
-        super(position.x, position.y, makeCircle(size), false);
+    public Bullet(Vector2 origin, Vector2 direction, final BulletDef def) {
+        super(origin.x, origin.y, makeCircle(def.size), false);
         drawer = new Drawer() {
             @Override
             public void draw() {
-                Vector2 drawPos = Bullet.this.getPosition();
-                drawModelAt(m, new Vector3(drawPos, position.z));
+                Vector2 drawPos = getPosition();
+                drawModelAt(def.model, new Vector3(drawPos, HOVER));
             }
         };
-        setVelocity(velocity);
+        setVelocity(direction.nor().scl(def.speed));
+        body.setBullet(true);
         identifier = EntityType.BULLET;
     }
 
@@ -35,11 +44,11 @@ public class Bullet extends PhysicalBody implements Drawable {
 
     @Override
     public void destroy() {
+        // TODO bullet shatter
         super.destroy();
     }
 
     @Override
     public void update(float delT) {
-
     }
 }

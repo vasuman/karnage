@@ -17,6 +17,8 @@ import java.util.Random;
  * Time: 1:22 PM
  */
 public abstract class Glob extends PhysicalBody implements Drawable {
+
+
     public static enum GlobType {
         Retard, Simple, Normal, Complex
     }
@@ -26,6 +28,7 @@ public abstract class Glob extends PhysicalBody implements Drawable {
         public Shape shape;
         public float speed;
         public float damp;
+        public float bounds;
         public Random r;
         public SpawnManager manager;
     }
@@ -33,7 +36,7 @@ public abstract class Glob extends PhysicalBody implements Drawable {
     protected GlobDef def;
     protected Drawer drawer;
 
-    protected Vector2 seek;
+    protected Vector2 seek = new Vector2();
 
     protected Glob(final GlobDef def, Vector2 position) {
         super(position.x, position.y, def.shape, false);
@@ -41,6 +44,10 @@ public abstract class Glob extends PhysicalBody implements Drawable {
         drawer = new Drawer() {
             @Override
             public void draw() {
+                Vector3 position = new Vector3(getPosition(), 0);
+                if (!perspectiveCamera.frustum.sphereInFrustum(position, def.bounds)) {
+                    return;
+                }
                 drawModelAt(def.model, new Vector3(getPosition(), 0));
             }
         };
@@ -62,7 +69,10 @@ public abstract class Glob extends PhysicalBody implements Drawable {
     }
 
     public void setSeek(Vector2 seek) {
-        this.seek = seek;
+        this.seek.set(seek);
     }
 
+    protected Vector2 getDirection() {
+        return seek.sub(getPosition()).nor();
+    }
 }

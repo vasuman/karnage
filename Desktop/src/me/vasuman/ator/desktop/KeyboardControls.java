@@ -20,7 +20,7 @@ public class KeyboardControls implements MainGame.RotationProvider {
     @Override
     public Vector2 getVector() {
         return new Vector2(getState(Input.Keys.A) - getState(Input.Keys.D),
-                getState(Input.Keys.W) - getState(Input.Keys.S));
+                getState(Input.Keys.S) - getState(Input.Keys.W));
     }
 
     @Override

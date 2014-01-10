@@ -50,14 +50,11 @@ public class Manager {
     }
 
     public void init(Level level) {
-        entities.clear();
+        clear();
         Manager.level = level;
     }
 
     public void clear() {
-        for (int i = entities.size() - 1; i >= 0; i--) {
-            entities.get(i).destroy();
-            entities.remove(i);
-        }
+        entities.clear();
     }
 }

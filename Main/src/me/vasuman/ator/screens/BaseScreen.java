@@ -31,22 +31,9 @@ public abstract class BaseScreen implements Screen {
         paused = false;
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
-        stage = new Stage(resX, resY, true);
+        stage = new Stage();
+        stage.setViewport(resX, resY, true, MainGame.offsetX, MainGame.offsetY, MainGame.viewWidth, MainGame.viewHeight);
         Drawer.init(resX, resY);
-        /**
-         float aspectRatio = (float) width / height;
-         float defaultRatio = (float) resX / resY;
-         if(aspectRatio > defaultRatio) {
-         int viewWidth = (int) (defaultRatio * height);
-         System.out.println(width - viewWidth);
-         stage.setViewport(resX, resY, true, (width - viewWidth) / 2, 0, viewWidth, height);
-         Drawer.init(width, height);
-         } else if(aspectRatio < defaultRatio) {
-         Drawer.init(resX, resY);
-         //stage.setViewport();
-         } else {
-         }
-         */
         Gdx.input.setInputProcessor(stage);
         Screen current = game.getScreen();
         if (current != null) {
