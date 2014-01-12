@@ -2,8 +2,8 @@ package me.vasuman.ator.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.MainGame;
 
@@ -24,11 +24,25 @@ public abstract class BaseScreen implements Screen {
     }
 
     public int width, height;
-    protected boolean paused;
+    protected boolean paused = false;
+
+    public void setInstigate(boolean instigate) {
+        this.instigate = instigate;
+    }
+
+    public boolean isInstigate() {
+        return instigate;
+    }
+
+    private boolean instigate = false;
+
+    public Stage getStage() {
+        return stage;
+    }
+
     protected Stage stage;
 
     public BaseScreen() {
-        paused = false;
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
         stage = new Stage();
@@ -40,10 +54,6 @@ public abstract class BaseScreen implements Screen {
             current.dispose();
         }
         game.setScreen(this);
-    }
-
-    protected void setActorPosition(Actor actor, float x, float y) {
-        actor.setPosition(x - actor.getWidth() / 2, y - actor.getHeight() / 2);
     }
 
 
@@ -62,6 +72,8 @@ public abstract class BaseScreen implements Screen {
     public void render(float delta) {
         stage.act(delta);
         stage.draw();
+        // DEBUG!!
+        Table.drawDebug(stage);
     }
 
     @Override

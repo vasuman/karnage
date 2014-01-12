@@ -19,7 +19,6 @@ import java.util.Iterator;
  * Time: 5:54 PM
  */
 public class CustomInputListener extends InputListener {
-    // TODO: Multitouch
     public static final int MAX_TOUCH = 2;
     private HashMap<Integer, Vector2> map = new HashMap<Integer, Vector2>(MAX_TOUCH);
 
@@ -35,13 +34,13 @@ public class CustomInputListener extends InputListener {
     public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
         map.remove(pointer);
         tap = true;
-        setPosition(tapPosition, x, y);
+        tapPosition.set(x, y);
     }
 
     @Override
     public void touchDragged(InputEvent event, float x, float y, int pointer) {
         Vector2 position = map.get(pointer);
-        setPosition(position, x, y);
+        position.set(x, y);
     }
 
     @Override
@@ -51,13 +50,12 @@ public class CustomInputListener extends InputListener {
         }
         Vector2 position = new Vector2();
         map.put(pointer, position);
-        setPosition(position, x, y);
+        position.set(x, y);
         return true;
     }
 
-    private void setPosition(Vector2 position, float x, float y) {
-        System.out.println(x + "," + y);
-        position.set(Projection.getPlanarZ(camera.getPickRay(x, Gdx.graphics.getHeight() - y,
+    private Vector2 convertPosition(float x, float y) {
+        return (Projection.getPlanarZ(camera.getPickRay(x, Gdx.graphics.getHeight() - y,
                 0, 0, BaseScreen.resX, BaseScreen.resY)));
     }
 
@@ -67,15 +65,11 @@ public class CustomInputListener extends InputListener {
     }
 
     public boolean getTap() {
-        if (tap) {
-            tap = false;
-            return true;
-        }
         return tap;
     }
 
     public Vector2 getTapPosition() {
-        return tapPosition.cpy();
+        return convertPosition(tapPosition.x, tapPosition.y);
     }
 
     public Vector2 getPosition(int num) {
@@ -83,7 +77,11 @@ public class CustomInputListener extends InputListener {
         while (num > 0) {
             iterator.next();
         }
-        return new Vector2(iterator.next());
+        Vector2 touch = iterator.next();
+        return convertPosition(touch.x, touch.y);
     }
 
+    public void clearTap() {
+        tap = false;
+    }
 }

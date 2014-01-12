@@ -10,9 +10,11 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import me.vasuman.ator.Drawable;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.MainGame;
 import me.vasuman.ator.entities.Extension;
@@ -29,28 +31,32 @@ import java.util.Random;
  * Date: 12/29/13
  * Time: 6:25 PM
  */
-public class MenuScreen extends GridScreen implements LoadScreen.LoadCallback {
-
+public class MenuScreen extends GridScreen implements LoadScreen.LoadCallback, Drawable {
+    private Drawer drawer;
 
     public MenuScreen() {
         super();
         Skin skin = MainGame.assets.get("game.json", Skin.class);
         TextButton startButton = new TextButton("Start", skin.get(TextButton.TextButtonStyle.class));
-        final float posX = 640 - startButton.getWidth() / 2;
-        startButton.setPosition(posX, 400);
+        Table layout = new Table(skin);
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                new LoadScreen(MenuScreen.this,
-                        new AssetDescriptor<Model>("player-base.g3db", Model.class),
-                        new AssetDescriptor<Model>("canon.g3db", Model.class),
-                        new AssetDescriptor<Model>("tetrahedron.g3db", Model.class),
-                        new AssetDescriptor<Model>("icosahedron.g3db", Model.class),
-                        new AssetDescriptor<TextureAtlas>("game.atlas", TextureAtlas.class));
+                startLoading();
             }
         });
-        stage.addActor(startButton);
-
+        // DEBUG!
+        layout.debug();
+        layout.setFillParent(true);
+        stage.addActor(layout);
+        layout.add(startButton);
+        drawer = new Drawer() {
+            @Override
+            public void draw() {
+                MenuScreen.super.getDrawer().draw();
+                drawText("Bleatware Studios", resX / 2, resY / 3);
+            }
+        };
     }
 
     @Override
@@ -62,6 +68,21 @@ public class MenuScreen extends GridScreen implements LoadScreen.LoadCallback {
         super.render(delta);
     }
 
+    private void startLoading() {
+        // ADD all dependencies here!
+        new LoadScreen(MenuScreen.this,
+                new AssetDescriptor<Model>("player-base.g3db", Model.class),
+                new AssetDescriptor<Model>("canon.g3db", Model.class),
+                new AssetDescriptor<Model>("tetrahedron.g3db", Model.class),
+                new AssetDescriptor<Model>("icosahedron.g3db", Model.class),
+                new AssetDescriptor<TextureAtlas>("game.atlas", TextureAtlas.class));
+
+    }
+
+    @Override
+    public Drawer getDrawer() {
+        return drawer;
+    }
 
     @Override
     public void doneLoading() {
@@ -69,11 +90,13 @@ public class MenuScreen extends GridScreen implements LoadScreen.LoadCallback {
         CustomLevel.LevelDef def = new CustomLevel.LevelDef();
         def.tX = 128;
         def.tY = 128;
+
         Array<TextureAtlas.AtlasRegion> regions = atlas.findRegions("map/grid");
         def.tiles = new TextureRegion[regions.size];
         for (int i = 0; i < regions.size; i++) {
             def.tiles[i] = regions.get(i);
         }
+
         def.width = 3072;
         def.height = 2048;
         def.seed = new Random();

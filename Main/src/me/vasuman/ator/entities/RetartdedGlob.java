@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class RetartdedGlob extends Glob {
     private static final float period = 1.1732f;
-    public static final float DIRECTION_BIAS = 0.7f;
+    public static final float DIRECTION_BIAS = 0.42f;
     private float counter;
 
 

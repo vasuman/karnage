@@ -15,6 +15,9 @@ import me.vasuman.ator.MainGame;
  */
 public class Player extends PhysicalBody implements Drawable {
     protected Drawer drawer;
+    private int health;
+
+    private boolean damaged = false;
 
     public float getSize() {
         return def.size;
@@ -22,7 +25,10 @@ public class Player extends PhysicalBody implements Drawable {
 
 
     public void damage() {
-
+        damaged = true;
+        if (--health < 0) {
+            kill();
+        }
     }
 
     public static class PlayerDef {
@@ -44,6 +50,7 @@ public class Player extends PhysicalBody implements Drawable {
     public Player(final PlayerDef def) {
         super(def.position.x, def.position.y, makeCircle(def.size), false);
         this.def = def;
+        this.health = def.health;
         drawer = new Drawer() {
             private Model model = MainGame.assets.get(def.modelPath, Model.class);
 
@@ -69,6 +76,17 @@ public class Player extends PhysicalBody implements Drawable {
 
     @Override
     public void update(float delT) {
+    }
 
+    public boolean isDamaged() {
+        if (damaged) {
+            damaged = false;
+            return true;
+        }
+        return false;
+    }
+
+    public int getHealth() {
+        return health;
     }
 }

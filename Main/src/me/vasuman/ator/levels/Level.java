@@ -7,12 +7,16 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import me.vasuman.ator.*;
 import me.vasuman.ator.entities.Player;
 import me.vasuman.ator.screens.BaseScreen;
-import me.vasuman.ator.screens.MenuScreen;
+import me.vasuman.ator.screens.Layout;
+import me.vasuman.ator.screens.ui.PauseWindow;
 
 /**
  * Ator
@@ -28,7 +32,6 @@ public abstract class Level extends BaseScreen implements Drawable {
     public CustomInputListener inputListener;
     private Window pauseWindow;
     private Label resumeCounter;
-    private boolean instigate = false;
 
     public Level() {
         super();
@@ -51,57 +54,16 @@ public abstract class Level extends BaseScreen implements Drawable {
         stage.addListener(keyListen);
 
         inputListener = new CustomInputListener(Drawer.getPerspectiveCamera());
-        Skin skin = MainGame.assets.get("game.json", Skin.class);
-        Label fpsCount = new Label("", skin);
-        fpsCount.setPosition(100, 100);
-        fpsCount.addAction(new Action() {
-            @Override
-            public boolean act(float delta) {
-                Label actor = (Label) getActor();
-                actor.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
-                return false;
-            }
-        });
-        stage.addActor(fpsCount);
         stage.addListener(inputListener);
 
-        pauseWindow = new Window("Paused", skin);
-        pauseWindow.setSize(800, 480);
-        pauseWindow.padTop(100);
-        pauseWindow.padBottom(20);
-        pauseWindow.setKeepWithinStage(false);
+        Skin skin = MainGame.assets.get("game.json", Skin.class);
 
-        TextButton resumeButton = new TextButton("Resume", skin);
-        resumeButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                instigate = true;
-                resume();
-            }
-        });
-        pauseWindow.add(resumeButton).space(100);
+        // DEBUG!
 
-        TextButton quitButton = new TextButton("Quit", skin);
-        quitButton.addListener((new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                new MenuScreen();
-            }
-        }));
-        pauseWindow.add(quitButton).space(100);
-        pauseWindow.row();
-        TextButton calibrate = new TextButton("Calibrate", skin);
-        calibrate.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                MainGame.rotation.calibrate();
-            }
-        });
-        pauseWindow.add(calibrate);
-        pauseWindow.top();
+        pauseWindow = new PauseWindow(skin, this);
 
         resumeCounter = new Label("", skin);
-        setActorPosition(resumeCounter, 640, 200);
+        Layout.setActorCenter(resumeCounter, Layout.getStageCenter(stage));
 
         ImageButton pauseButton = new ImageButton(skin, "pause");
         pauseButton.setPosition(1200, 650);
@@ -111,6 +73,7 @@ public abstract class Level extends BaseScreen implements Drawable {
                 pause();
             }
         });
+
         stage.addActor(pauseButton);
         physics = Physics.getInstance();
         physics.init();
@@ -123,62 +86,60 @@ public abstract class Level extends BaseScreen implements Drawable {
             return;
         }
         super.pause();
-        pauseWindow.setPosition(240, -480);
-        pauseWindow.addAction(Actions.moveTo(240, 70, 0.2f));
         stage.addActor(pauseWindow);
     }
 
     @Override
     public void resume() {
-        if (!instigate) {
+        if (!isInstigate()) {
             return;
         }
-        instigate = false;
-        pauseWindow.addAction(Actions.sequence(Actions.moveTo(240, -480, 0.2f), new Action() {
-            @Override
-            public boolean act(float delta) {
-                pauseWindow.remove();
-                resumeCounter.addAction(Actions.sequence(
-                        new Action() {
-                            private float count = 3;
-                            private float rate = 1;
-                            @Override
-                            public boolean act(float delta) {
-                                if (count <= 0) {
-                                    return true;
-                                }
-                                ((Label) getActor()).setText("" + ((int) count + 1));
-                                count -= rate * delta;
-                                return false;
-                            }
-                        },
-                        new Action() {
-                            @Override
-                            public boolean act(float delta) {
-                                getActor().remove();
-                                // Clear all taps!!
-                                // KINDA hackish!
-                                inputListener.getTap();
-                                Level.super.resume();
-                                return true;
-                            }
+        setInstigate(false);
+        pauseWindow.remove();
+        resumeCounter.addAction(countdownResumeAction(3));
+        stage.addActor(resumeCounter);
+    }
+
+    private Action countdownResumeAction(final int time) {
+        return Actions.sequence(
+                new Action() {
+                    private float count = time;
+                    private float rate = 1;
+
+                    @Override
+                    public boolean act(float delta) {
+                        if (count <= 0) {
+                            return true;
                         }
-                ));
-                stage.addActor(resumeCounter);
-                return true;
-            }
-        }));
+                        ((Label) getActor()).setText("" + ((int) count + 1));
+                        count -= rate * delta;
+                        return false;
+                    }
+                },
+                new Action() {
+                    @Override
+                    public boolean act(float delta) {
+                        getActor().remove();
+                        // Clear all taps!!
+                        // KINDA hackish!
+                        inputListener.getTap();
+                        Level.super.resume();
+                        return true;
+                    }
+                }
+        );
     }
 
     @Override
     public void render(float delta) {
         if (!paused) {
             physics.update(delta);
-            update(delta);
             manager.update(delta);
+            update(delta);
         }
+        inputListener.clearTap();
         Drawer.clearScreen();
-        updateCamera();
+        updateCamera(delta);
         Drawer.setupCamera();
         // Draw self
         getDrawer().draw();
@@ -202,5 +163,5 @@ public abstract class Level extends BaseScreen implements Drawable {
 
     public abstract void update(float delT);
 
-    public abstract void updateCamera();
+    public abstract void updateCamera(float delT);
 }

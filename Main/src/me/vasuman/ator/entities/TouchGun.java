@@ -5,29 +5,38 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector2;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.Manager;
+import me.vasuman.ator.util.Counter;
 
 /**
  * Ator
  * User: vasuman
- * Date: 12/3/13
- * Time: 7:55 PM
+ * Date: 1/11/14
+ * Time: 1:38 PM
  */
+public class TouchGun extends Extension {
+    public static class TouchGunBuilder implements Extension.ExtensionBuilder {
+        private float fireRate;
 
-// TODO: implement Drawable
-public class TapGun extends Extension {
-    public static class TapGunBuilder implements ExtensionBuilder {
+        public TouchGunBuilder(float fireRate) {
+            this.fireRate = fireRate;
+        }
+
         @Override
-        public TapGun build() {
-            return new TapGun();
+        public TouchGun build() {
+            return new TouchGun(this);
         }
     }
 
     protected final Vector2 direction = new Vector2(1, 0);
-    private static Bullet.BulletDef def = new Bullet.BulletDef();
+    private Bullet.BulletDef def = new Bullet.BulletDef();
+    private Counter cooldown;
+    private TouchGunBuilder builder;
 
-    private TapGun() {
+    private TouchGun(TouchGunBuilder builder) {
+        this.builder = builder;
+        cooldown = new Counter(1 / builder.fireRate);
         initBulletDef();
-        identifier = EntityType.GUN;
+        identifier = GameEntity.EntityType.GUN;
     }
 
     private void initBulletDef() {
@@ -43,10 +52,13 @@ public class TapGun extends Extension {
 
     @Override
     public void update(float delT) {
-        if (!Manager.level.inputListener.getTap()) {
+        if (!cooldown.update(delT)) {
             return;
         }
-        Vector2 rotation = Manager.level.inputListener.getTapPosition().sub(player.getPosition());
+        if (Manager.level.inputListener.getTouch() == 0) {
+            return;
+        }
+        Vector2 rotation = Manager.level.inputListener.getPosition(0).sub(player.getPosition());
         rotation.nor();
         direction.set(rotation);
         this.fire();
@@ -59,4 +71,5 @@ public class TapGun extends Extension {
         position.add(player.getPosition());
         new Bullet(position, direction.cpy(), def);
     }
+
 }

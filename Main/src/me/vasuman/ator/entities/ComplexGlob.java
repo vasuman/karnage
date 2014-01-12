@@ -2,6 +2,7 @@ package me.vasuman.ator.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import me.vasuman.ator.Physics;
+import me.vasuman.ator.util.Counter;
 
 /**
  * Ator
@@ -10,16 +11,16 @@ import me.vasuman.ator.Physics;
  * Time: 10:48 AM
  */
 public class ComplexGlob extends Glob {
-    public static final float CHARGE_FACTOR = 100f;
-    public static final float SENSE_RADIUS = 100f;
-    public static final float RECOVERY_TIME = 3.5f;
+    public static final float CHARGE_FACTOR = 150f;
+    public static final float SENSE_RADIUS = 80f;
+    public static final float RECOVERY_TIME = 2f;
 
     private static enum ComplexGlobState {
         Seeking, Charging
     }
 
     private ComplexGlobState state = ComplexGlobState.Seeking;
-    private float timeout = RECOVERY_TIME;
+    private Counter recovery = new Counter(RECOVERY_TIME);
 
     public ComplexGlob(GlobDef def, Vector2 position) {
         super(def, position);
@@ -54,8 +55,7 @@ public class ComplexGlob extends Glob {
             direction.scl(def.speed);
             pushBody(direction);
         } else if (state == ComplexGlobState.Charging) {
-            timeout -= delT;
-            if (timeout <= 0) {
+            if (recovery.update(delT)) {
                 state = ComplexGlobState.Seeking;
             }
         }
@@ -73,7 +73,6 @@ public class ComplexGlob extends Glob {
 
     private void chargeAt(Vector2 direction) {
         state = ComplexGlobState.Charging;
-        timeout = RECOVERY_TIME;
-        pushBody(direction.scl(CHARGE_FACTOR * def.speed));
+        pushBody(direction.nor().scl(CHARGE_FACTOR * def.speed));
     }
 }

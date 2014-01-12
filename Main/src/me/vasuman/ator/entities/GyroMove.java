@@ -19,25 +19,24 @@ public class GyroMove extends Extension {
 
         @Override
         public Extension build() {
-            return new GyroMove(speed);
+            return new GyroMove(this);
         }
     }
 
-    private float speed;
+    private GyroMoveBuilder builder;
 
-    private GyroMove(float speed) {
-        this.speed = speed;
+    private GyroMove(GyroMoveBuilder builder) {
+        this.builder = builder;
     }
 
     @Override
     public void destroy() {
-
     }
 
     @Override
     public void update(float delT) {
         Vector2 movement = MainGame.rotation.getVector();
-        movement.scl(-speed);
+        movement.scl(-builder.speed);
         player.setVelocity(movement);
     }
 }

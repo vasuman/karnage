@@ -1,11 +1,14 @@
 package me.vasuman.ator.levels;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.environment.BaseLight;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import me.vasuman.ator.Config;
 import me.vasuman.ator.Drawer;
 import me.vasuman.ator.MainGame;
@@ -13,6 +16,9 @@ import me.vasuman.ator.Physics;
 import me.vasuman.ator.entities.GameEntity;
 import me.vasuman.ator.entities.Player;
 import me.vasuman.ator.entities.Wall;
+import me.vasuman.ator.screens.ui.GameOverWindow;
+import me.vasuman.ator.screens.ui.RefreshLabel;
+import me.vasuman.ator.util.Counter;
 
 import java.util.Random;
 
@@ -23,6 +29,8 @@ import java.util.Random;
  * Time: 7:41 PM
  */
 public class CustomLevel extends Level {
+    private static final float SHAKE_FACTOR = 7f;
+
     public static class LevelDef {
         public int width;
         public int height;
@@ -41,13 +49,17 @@ public class CustomLevel extends Level {
             obstacles[1] = new Rectangle(0, 0, width, size);
             obstacles[2] = new Rectangle(width - size, 0, size, height);
             obstacles[3] = new Rectangle(0, height - size, width, size);
-            pad = 2 * size;
+            pad = 4 * size;
         }
     }
 
     private static final float RAD_FCT = (float) Math.sqrt(2) / 2;
 
+    private Counter shakeTimer = new Counter(0.5f);
+    private boolean shaking = false;
+
     private Vector3 offsetPosition = new Vector3();
+    public Table onScreenDisplay;
     private SpawnManager spawnManager;
     protected LevelDef def;
     protected int[] tData;
@@ -55,6 +67,7 @@ public class CustomLevel extends Level {
 
     public CustomLevel(final LevelDef def) {
         super();
+        shakeTimer.reset();
         this.def = def;
         final int numX = (def.width / def.tX);
         final int numY = (def.height / def.tY);
@@ -102,29 +115,94 @@ public class CustomLevel extends Level {
             public boolean handleCollision(GameEntity entA, GameEntity entB) {
                 if (entB.getIdentifier() == GameEntity.EntityType.PLAYER) {
                     ((Player) entB).damage();
-                    //entA.kill();
+                    entA.kill();
                 }
                 return false;
             }
         });
+        initOSD();
+
+    }
+
+    private void initOSD() {
+        Skin skin = MainGame.assets.get("game.json", Skin.class);
+
+        onScreenDisplay = new Table();
+        onScreenDisplay.setFillParent(true);
+        stage.addActor(onScreenDisplay);
+
+        RefreshLabel scoreLabel = new RefreshLabel(skin, new RefreshLabel.RefreshTrigger() {
+            @Override
+            public String getText() {
+                return "Score: " + spawnManager.getScore();
+            }
+        });
+
+        RefreshLabel healthLabel = new RefreshLabel(skin, new RefreshLabel.RefreshTrigger() {
+            @Override
+            public String getText() {
+                return "Health: " + player.getHealth();
+            }
+        });
+
+        //DEBUG!!
+        RefreshLabel fpsCounter = new RefreshLabel(skin, new RefreshLabel.RefreshTrigger() {
+            @Override
+            public String getText() {
+                return "FPS: " + Gdx.graphics.getFramesPerSecond();
+            }
+        });
+
+        onScreenDisplay.add(scoreLabel).expand().top().left();
+        onScreenDisplay.add(healthLabel).expand().top().left();
+        onScreenDisplay.row();
+        onScreenDisplay.add(fpsCounter).left();
     }
 
     @Override
     public void update(float delT) {
+        if (player.isDead()) {
+            endGame();
+            return;
+        }
+        if (player.isDamaged()) {
+            shaking = true;
+        }
         spawnManager.update(delT, player.getPosition());
     }
 
+    private void endGame() {
+        Skin skin = MainGame.assets.get("game.json", Skin.class);
+        paused = true;
+        shaking = true;
+        onScreenDisplay.remove();
+        stage.addActor(new GameOverWindow(skin, spawnManager.getScore(), this));
+    }
+
     @Override
-    public void updateCamera() {
+    public void updateCamera(float delT) {
         PerspectiveCamera camera = Drawer.getPerspectiveCamera();
         Vector3 playerPosition = new Vector3(player.getPosition(), 0);
         Vector2 moveVector = MainGame.rotation.getVector();
+        if (shaking) {
+            if (shakeTimer.update(delT)) {
+                shaking = false;
+            }
+            float dispX = ((float) Math.random() - 0.5f) * SHAKE_FACTOR;
+            float dispY = ((float) Math.random() - 0.5f) * SHAKE_FACTOR;
+            moveVector.add(dispX, dispY);
+        }
         moveVector.scl(Config.MOTION_IMPACT * Config.CAM_ELEVATION);
         LPFSet(offsetPosition, wrapSphere(moveVector, Config.CAM_ELEVATION));
         camera.position.set(playerPosition.cpy().add(offsetPosition));
         camera.lookAt(playerPosition);
         camera.up.set(0, 1, 0);
         camera.update();
+    }
+
+    private void shiftCamera() {
+
+
     }
 
     public static void LPFSet(Vector3 vecA, Vector3 vecB) {

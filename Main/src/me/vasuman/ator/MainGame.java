@@ -23,12 +23,8 @@ public class MainGame extends Game implements LoadScreen.LoadCallback {
 
     @Override
     public void doneLoading() {
-        /*
         Skin skin = assets.get("game.json", Skin.class);
-        BitmapFont font = new BitmapFont(Gdx.files.internal("tech.fnt"), new TextureRegion(
-        new Texture(Gdx.files.internal("tech.png"), true)));
-        skin.add("default-font", font);
-        */
+        Drawer.setFont(skin.getFont("default-font"));
         new MenuScreen();
     }
 
