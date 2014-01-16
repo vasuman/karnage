@@ -15,16 +15,27 @@ import com.bleatware.karnage.Drawer;
 public class Bullet extends PhysicalBody implements Drawable {
     public static float HOVER = 4f;
 
+    public BulletType getType() {
+        return def.type;
+    }
+
+    public static enum BulletType {
+        Hostile, Friendly
+    }
+
     public static class BulletDef {
         public float speed;
         public Model model;
         public float size;
+        public BulletType type;
     }
 
     protected Drawer drawer;
+    protected BulletDef def;
 
     public Bullet(Vector2 origin, Vector2 direction, final BulletDef def) {
-        super(origin.x, origin.y, makeCircle(def.size), false);
+        super(origin.x, origin.y, makeCircle(def.size), false, true);
+        this.def = def;
         drawer = new Drawer() {
             @Override
             public void draw() {

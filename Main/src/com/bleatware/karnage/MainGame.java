@@ -7,6 +7,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.bleatware.karnage.screens.BaseScreen;
 import com.bleatware.karnage.screens.LoadScreen;
 import com.bleatware.karnage.screens.MenuScreen;
@@ -29,7 +31,7 @@ public class MainGame extends Game implements LoadScreen.LoadCallback {
     }
 
     public static interface RotationProvider {
-        public static final float LIMIT = (float) Math.sqrt(2);
+        public static final float LIMIT = 1; //(float) Math.sqrt(2);
 
         public Vector2 getVector();
 
@@ -38,10 +40,18 @@ public class MainGame extends Game implements LoadScreen.LoadCallback {
 
     public static RotationProvider rotation;
     public static AssetManager assets;
+    public static GameState state;
 
-    public MainGame(RotationProvider rotationProvider) {
+    public MainGame(RotationProvider rotationProvider, String serializedGameState) {
         rotation = rotationProvider;
         assets = new AssetManager();
+        Json json = new Json(JsonWriter.OutputType.json);
+        state = json.fromJson(GameState.class, serializedGameState);
+    }
+
+    public String getGameState() {
+        Json json = new Json(JsonWriter.OutputType.json);
+        return json.toJson(state);
     }
 
     @Override

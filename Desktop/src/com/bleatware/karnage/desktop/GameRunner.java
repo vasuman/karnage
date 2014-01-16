@@ -2,6 +2,8 @@ package com.bleatware.karnage.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.utils.JsonReader;
+import com.bleatware.karnage.GameState;
 import com.bleatware.karnage.MainGame;
 
 /**
@@ -17,6 +19,13 @@ public class GameRunner {
         config.width = 800;
         config.height = 400;
         config.useGL20 = true;
-        new LwjglApplication(new MainGame(new KeyboardControls()), config);
+        new LwjglApplication(new MainGame(new KeyboardControls(), "{}"), config);
+    }
+
+    private GameState loadState() {
+        GameState state = new GameState();
+        JsonReader reader = new JsonReader();
+
+        return state;
     }
 }

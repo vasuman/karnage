@@ -57,9 +57,6 @@ public abstract class Drawer {
         return perspectiveCamera;
     }
 
-    public static void setViewport(int x, int y, int width, int height) {
-        glCtx.glViewport(x, y, width, height);
-    }
 
     public static Environment getEnvironment() {
         return environment;
@@ -87,11 +84,6 @@ public abstract class Drawer {
         shapeDraw.end();
     }
 
-    protected void debugLine(float x1, float y1, float x2, float y2) {
-        shapeDraw.begin(ShapeRenderer.ShapeType.Line);
-        shapeDraw.line(x1, y1, x2, y2);
-        shapeDraw.end();
-    }
 
     protected void debugCircle(float x, float y, float radius) {
         shapeDraw.begin(ShapeRenderer.ShapeType.Filled);

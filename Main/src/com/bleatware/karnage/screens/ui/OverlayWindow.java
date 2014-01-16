@@ -15,6 +15,7 @@ public class OverlayWindow extends Window {
     public static float PREF_WIDTH = 800;
     public static float PREF_HEIGHT = 480;
     public static float TOP_PAD = 100;
+    public static float BOTTOM_PAD = 20;
     public static final float SPACE = 50;
 
     public OverlayWindow(String title, Skin skin, BaseScreen screen) {
@@ -23,7 +24,8 @@ public class OverlayWindow extends Window {
         padTop(TOP_PAD);
         setMovable(false);
         setResizable(false);
+        setModal(true);
         setKeepWithinStage(false);
-        Layout.setActorCenter(this, Layout.getStageCenter(screen.getStage()));
+        Layout.setActorPosition(this, screen.getStage(), Layout.Position.Center);
     }
 }

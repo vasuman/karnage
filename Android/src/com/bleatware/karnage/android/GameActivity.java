@@ -1,10 +1,12 @@
 package com.bleatware.karnage.android;
 
 
+import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.bleatware.karnage.GameState;
 import com.bleatware.karnage.MainGame;
 
 /**
@@ -14,6 +16,7 @@ import com.bleatware.karnage.MainGame;
  * Time: 7:11 PM
  */
 public class GameActivity extends AndroidApplication {
+    private static final String GAME_STATE_FILE = "GameState";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -22,7 +25,14 @@ public class GameActivity extends AndroidApplication {
         config.useGL20 = true;
         config.useAccelerometer = true;
         config.useWakelock = true;
-        initialize(new MainGame(new SystemRotation((SensorManager) getSystemService(SENSOR_SERVICE))), config);
+        GameState state = getSavedGameState();
+        initialize(new MainGame(new SystemRotation((SensorManager) getSystemService(SENSOR_SERVICE)), "{}"), config);
+    }
+
+    private GameState getSavedGameState() {
+        SharedPreferences preferences = getSharedPreferences(GAME_STATE_FILE, MODE_PRIVATE);
+        GameState state = new GameState();
+        return null;
     }
 
 

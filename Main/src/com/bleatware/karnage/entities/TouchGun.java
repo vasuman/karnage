@@ -43,6 +43,7 @@ public class TouchGun extends Extension {
         def.size = 5;
         def.speed = 1000;
         def.model = Drawer.basicSphere(def.size, ColorAttribute.createDiffuse(Color.YELLOW));
+        def.type = Bullet.BulletType.Friendly;
     }
 
 

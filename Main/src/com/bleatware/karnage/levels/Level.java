@@ -63,7 +63,7 @@ public abstract class Level extends BaseScreen implements Drawable {
         pauseWindow = new PauseWindow(skin, this);
 
         resumeCounter = new Label("", skin);
-        Layout.setActorCenter(resumeCounter, Layout.getStageCenter(stage));
+        Layout.setActorPosition(resumeCounter, stage, Layout.Position.Center);
 
         ImageButton pauseButton = new ImageButton(skin, "pause");
         pauseButton.setPosition(1200, 650);
@@ -120,9 +120,6 @@ public abstract class Level extends BaseScreen implements Drawable {
                     @Override
                     public boolean act(float delta) {
                         getActor().remove();
-                        // Clear all taps!!
-                        // KINDA hackish!
-                        inputListener.getTap();
                         Level.super.resume();
                         return true;
                     }

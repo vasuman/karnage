@@ -27,13 +27,13 @@ public class TapGun extends Extension {
 
     private TapGun() {
         initBulletDef();
-        identifier = EntityType.GUN;
     }
 
     private void initBulletDef() {
         def.size = 5;
         def.speed = 1000;
         def.model = Drawer.basicSphere(def.size, ColorAttribute.createDiffuse(Color.YELLOW));
+        def.type = Bullet.BulletType.Friendly;
     }
 
 

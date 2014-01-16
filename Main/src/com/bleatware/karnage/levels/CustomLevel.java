@@ -13,6 +13,7 @@ import com.bleatware.karnage.Config;
 import com.bleatware.karnage.Drawer;
 import com.bleatware.karnage.MainGame;
 import com.bleatware.karnage.Physics;
+import com.bleatware.karnage.entities.Bullet;
 import com.bleatware.karnage.entities.GameEntity;
 import com.bleatware.karnage.entities.Player;
 import com.bleatware.karnage.entities.Wall;
@@ -103,9 +104,25 @@ public class CustomLevel extends Level {
         physics.registerListener(GameEntity.EntityType.BULLET, new Physics.ContactCallback() {
             @Override
             public boolean handleCollision(GameEntity entA, GameEntity entB) {
-                entA.kill();
-                if (entB.getIdentifier() == GameEntity.EntityType.GLOB) {
-                    entB.kill();
+                Bullet bullet = (Bullet) entA;
+                if (entB.getIdentifier() == GameEntity.EntityType.BULLET) {
+                    //entA.kill();
+                    //entB.kill();
+                    return true;
+                }
+
+                if (bullet.getType() == Bullet.BulletType.Friendly) {
+                    entA.kill();
+                    if (entB.getIdentifier() == GameEntity.EntityType.GLOB) {
+                        entB.kill();
+                    }
+                } else if (bullet.getType() == Bullet.BulletType.Hostile) {
+                    if (entB.getIdentifier() != GameEntity.EntityType.GLOB) {
+                        entA.kill();
+                        if (entB.getIdentifier() == GameEntity.EntityType.PLAYER) {
+                            player.damage();
+                        }
+                    }
                 }
                 return true;
             }
@@ -116,6 +133,7 @@ public class CustomLevel extends Level {
                 if (entB.getIdentifier() == GameEntity.EntityType.PLAYER) {
                     ((Player) entB).damage();
                     entA.kill();
+                    return true;
                 }
                 return false;
             }
@@ -156,7 +174,7 @@ public class CustomLevel extends Level {
         onScreenDisplay.add(scoreLabel).expand().top().left();
         onScreenDisplay.add(healthLabel).expand().top().left();
         onScreenDisplay.row();
-        onScreenDisplay.add(fpsCounter).left();
+        onScreenDisplay.add(fpsCounter).colspan(2).center();
     }
 
     @Override
@@ -198,11 +216,6 @@ public class CustomLevel extends Level {
         camera.lookAt(playerPosition);
         camera.up.set(0, 1, 0);
         camera.update();
-    }
-
-    private void shiftCamera() {
-
-
     }
 
     public static void LPFSet(Vector3 vecA, Vector3 vecB) {

@@ -45,7 +45,17 @@ public class Physics {
         world.setContactListener(new ContactListener() {
             @Override
             public void beginContact(Contact contact) {
-
+                GameEntity entA = ((GameEntity) contact.getFixtureB().getBody().getUserData());
+                GameEntity entB = ((GameEntity) contact.getFixtureA().getBody().getUserData());
+                if (callbackMap.containsKey(entA.getIdentifier())) {
+                    boolean flag = callbackMap.get(entA.getIdentifier()).handleCollision(entA, entB);
+                    if (flag) {
+                        return;
+                    }
+                }
+                if (callbackMap.containsKey(entB.getIdentifier())) {
+                    callbackMap.get(entB.getIdentifier()).handleCollision(entB, entA);
+                }
             }
 
             @Override
@@ -60,20 +70,7 @@ public class Physics {
 
             @Override
             public void postSolve(Contact contact, ContactImpulse impulse) {
-                GameEntity entA = ((GameEntity) contact.getFixtureB().getBody().getUserData());
-                GameEntity entB = ((GameEntity) contact.getFixtureA().getBody().getUserData());
-                if (callbackMap.containsKey(entA.getIdentifier())) {
-                    boolean flag = callbackMap.get(entA.getIdentifier()).handleCollision(entA, entB);
-                    if (flag) {
-                        return;
-                    }
-                }
-                if (callbackMap.containsKey(entB.getIdentifier())) {
-                    boolean flag = callbackMap.get(entB.getIdentifier()).handleCollision(entB, entA);
-                    if (flag) {
-                        return;
-                    }
-                }
+
             }
         });
     }

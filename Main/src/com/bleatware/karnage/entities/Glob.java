@@ -18,9 +18,8 @@ import java.util.Random;
  */
 public abstract class Glob extends PhysicalBody implements Drawable {
 
-
     public static enum GlobType {
-        Retard, Simple, Normal, Complex
+        Retard, Simple, Normal, Shooting, Complex
     }
 
     public static class GlobDef {

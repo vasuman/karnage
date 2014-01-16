@@ -13,7 +13,6 @@ import com.bleatware.karnage.Physics;
 public abstract class PhysicalBody extends GameEntity {
     protected Body body;
 
-
     public static Shape makeCircle(float r) {
         CircleShape shape = new CircleShape();
         shape.setRadius(r / Physics.scale);
@@ -40,12 +39,17 @@ public abstract class PhysicalBody extends GameEntity {
     }
 
     protected PhysicalBody(float x, float y, Shape shape, boolean fixed) {
+        this(x, y, shape, fixed, false);
+    }
+
+    protected PhysicalBody(float x, float y, Shape shape, boolean fixed, boolean sensor) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = (fixed) ? BodyDef.BodyType.StaticBody : BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(x / Physics.scale, y / Physics.scale);
         body = Physics.getInstance().addBody(bodyDef);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
+        fixtureDef.isSensor = sensor;
         body.createFixture(fixtureDef);
         body.setUserData(this);
     }
@@ -70,6 +74,12 @@ public abstract class PhysicalBody extends GameEntity {
         Vector2 velocity = new Vector2(vel);
         velocity.scl(1 / Physics.scale);
         body.setLinearVelocity(velocity);
+
+    }
+
+    protected void pushBody(Vector2 force, float delT) {
+        force.scl(delT);
+        body.applyLinearImpulse(force, body.getWorldCenter(), true);
     }
 
     @Override

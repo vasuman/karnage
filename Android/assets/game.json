@@ -6,6 +6,12 @@
             b: 1,
             a: 1
         },
+        blue: {
+            r: 0,
+            g: 0,
+            b: 1,
+            a: 1
+        },
         transclucent: {
             r: 0,
             g: 0,
@@ -15,15 +21,43 @@
     },
     com.badlogic.gdx.graphics.g2d.BitmapFont: {
         default-font: {
+            file: arch.fnt
+        },
+        small-font: {
             file: tech.fnt
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
         default: {
-            down: ui/button,
             up: ui/button,
             font: default-font,
-            fontColor: white
+        },
+        green-r: {
+            up: ui/green-button-rl,
+            font: default-font,
+        },
+        blue-r: {
+            up: ui/blue-button-rl,
+            font: default-font,
+        },
+        red-r: {
+            up: ui/red-button-rl,
+            font: default-font,
+        },
+        dialog: {
+            up: ui/dialog-button,
+            font: small-font,
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+        pup-lock: {
+            up: ui/powerup-locked,
+        },
+        pup-unlock: {
+            up: ui/powerup-unlocked,
+        },
+        pup-active: {
+            up: ui/powerup-activated,
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
@@ -43,6 +77,23 @@
     com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
         pause: {
             imageUp: ui/pause,
+        },
+        resume: {
+            imageUp: ui/play,
+            up: ui/green-button-rl
+        },
+        quit: {
+            imageUp: ui/quit,
+            up: ui/red-button-rl
+        },
+        back: {
+            imageUp: ui/back,
+            up: ui/button
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.Touchpad$TouchpadStyle: {
+        stick-gun: {
+            background: ui/stick-background
         }
     }
 }

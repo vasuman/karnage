@@ -11,7 +11,7 @@ import com.bleatware.karnage.util.Counter;
  * Time: 10:48 AM
  */
 public class ComplexGlob extends Glob {
-    public static final float CHARGE_FACTOR = 150f;
+    public static final float CHARGE_FACTOR = 80f;
     public static final float SENSE_RADIUS = 80f;
     public static final float RECOVERY_TIME = 2f;
 
@@ -62,6 +62,9 @@ public class ComplexGlob extends Glob {
     }
 
     private void dodgeBullet(Bullet body) {
+        if (body.getType() == Bullet.BulletType.Hostile) {
+            return;
+        }
         Vector2 danger = body.getVelocity().cpy();
         danger.nor();
         Vector2 disp = getPosition().sub(body.getPosition());

@@ -9,9 +9,9 @@ import com.badlogic.gdx.math.Vector2;
  * Time: 9:59 PM
  */
 public class RetartdedGlob extends Glob {
-    private static final float period = 1.1732f;
-    public static final float DIRECTION_BIAS = 0.42f;
-    private float counter;
+    private static final float FORCE_FACTOR = 483;
+    public static final float DIRECTION_BIAS = 0.37f;
+    private float minRatio;
 
 
     @Override
@@ -21,23 +21,21 @@ public class RetartdedGlob extends Glob {
 
     public RetartdedGlob(final GlobDef def, Vector2 postion) {
         super(def, postion);
-        counter = def.r.nextFloat() * period / 2;
+        minRatio = def.r.nextFloat() * 0.2f + 0.2f;
     }
 
 
     @Override
     public void update(float delT) {
-        counter += delT;
-        if (counter > period) {
+        if (getVelocity().len() < def.speed * minRatio) {
             float weight = def.r.nextFloat() * DIRECTION_BIAS;
             Vector2 direct = getDirection();
             direct.scl(weight * def.speed);
             Vector2 random = new Vector2(def.r.nextFloat() - 0.5f, def.r.nextFloat() - 0.5f);
             random.nor();
-            random.scl((1 - weight) * def.speed);
+            random.scl((1 - weight) * FORCE_FACTOR);
             random.add(direct);
             pushBody(random);
-            counter = def.r.nextFloat() * period / 2;
         }
     }
 

@@ -7,6 +7,8 @@ import com.bleatware.karnage.Drawable;
 import com.bleatware.karnage.Drawer;
 import com.bleatware.karnage.MainGame;
 
+import java.util.ArrayList;
+
 /**
  * Ator
  * User: vasuman
@@ -37,7 +39,7 @@ public class Player extends PhysicalBody implements Drawable {
         public float size;
         public float damp;
         public String modelPath;
-        public Extension.ExtensionBuilder[] builders;
+        public ArrayList<Extension.ExtensionBuilder> builders = new ArrayList<Extension.ExtensionBuilder>();
     }
 
     @Override
